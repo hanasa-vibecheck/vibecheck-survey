@@ -167,6 +167,11 @@ button:disabled{opacity:.5}
         <button class="primary" type="button" id="saveGifts" style="width:100%;margin-top:12px" data-t="save"></button>
       </div>
       <div class="card">
+        <h2 data-t="payTitle"></h2>
+        <p class="hint" data-t="payHint"></p>
+        <div id="payList"></div>
+      </div>
+      <div class="card">
         <h2 data-t="linksTitle"></h2>
         <p><a href="../" data-t="surveyLink"></a></p>
       </div>
@@ -187,6 +192,8 @@ const TXT = {
   badLogin: ["ئیمەیڵ یان وشەی نهێنی هەڵەیە.", "Wrong email or password."], notAdmin: ["ئەم پەڕەیە تەنها بۆ بەڕێوەبەرە.", "This page is for admins only."],
   needSql: ["هەندێک بەش کار ناکەن تا فایلی 0003_admin_plans.sql لە Supabase SQL Editor جێبەجێ نەکەیت.", "Some parts need the database update 0003_admin_plans.sql (Supabase → SQL Editor)."],
   tabChanges: ["گۆڕانکاری", "Changes"], tabPhotos: ["وێنە", "Photos"], tabPlaces: ["شوێن", "Places"], tabTeam: ["تیم", "Team"], tabClaims: ["خاوەنەکان", "Owners"],
+  plus: ["Plus", "Plus"], payTitle: ["پارەدانەکانی FIB", "FIB payments"], payHint: ["دوایین پارەدانەکان لە ماڵپەڕەکەوە.", "Latest payments from the website."],
+  pay_paid: ["دراوە", "Paid"], pay_unpaid: ["نەدراوە", "Not paid"], pay_declined: ["ڕەتکراوە", "Declined"], pay_expired: ["بەسەرچوو", "Expired"], pay_cancelled: ["هەڵوەشاوە", "Cancelled"],
   claimsHint: ["داواکاری خاوەنی شوێن. پێش پەسەندکردن پەیوەندی بە ژمارەکەوە بکە و مۆڵەت و ناسنامەکە بپشکنە.", "Venue owner claims. Call the number and check the licence and ID before approving."],
   claimLic: ["مۆڵەت: {x}", "Licence: {x}"], reject: ["ڕەتکردنەوە", "Reject"], rejectWhy: ["هۆکاری ڕەتکردنەوە (بۆ خاوەنەکە)", "Reason for rejecting (shown to the owner)"],
   approveAsk: ["{who} ببێتە خاوەنی {place}؟ پەیوەندیت پێوە کرد و بەڵگەنامەکانت پشکنی؟", "Make {who} the owner of {place}? Did you call them and check the documents?"],
@@ -507,6 +514,18 @@ async function loadSettings() {
   $("#launchDate").value = s.launch_date || "";
   $("#gGold").value = s.gifts_per_month?.golden ?? 1; $("#gDia").value = s.gifts_per_month?.diamond ?? 3;
   showFreeEnd(s.free_plus_days ?? 90);
+  loadPayments();
+}
+async function loadPayments() {
+  const box = $("#payList");
+  const { data, error } = await sb.rpc("admin_payments", { max_rows: 50 });
+  if (error) { box.innerHTML = `<p class="hint">${esc(/function|schema cache/.test(error.message) ? t("need0008").replace("0008_reservations", "0009_fib_payments") : t("failed"))}</p>`; return; }
+  const list = Array.isArray(data) ? data : [];
+  if (!list.length) { box.innerHTML = `<p class="hint">${t("nothing")}</p>`; return; }
+  const paid = list.filter(p => p.status === "paid").reduce((a, p) => a + p.amount_iqd, 0);
+  box.innerHTML = `<p><b class="ltr">${paid.toLocaleString("en")} IQD</b></p>` + list.map(p => `<div class="row" style="padding:6px 0;border-top:1px solid var(--line)"><div class="grow"><b>${esc(p.display_name || "?")}</b> · ${esc(t(p.tier))}
+    <div class="who">${esc(when(p.created_at))} · <span class="ltr">${p.amount_iqd.toLocaleString("en")} IQD</span></div></div>
+    <span class="pill ${p.status === "paid" ? "ok" : p.status === "unpaid" ? "wait" : "mut"}">${t("pay_" + p.status)}</span></div>`).join("");
 }
 function showFreeEnd(days) {
   const d = $("#launchDate").value;
