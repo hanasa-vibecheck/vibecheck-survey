@@ -212,7 +212,7 @@ button:disabled{opacity:.5}
   <div class="progress" id="prog" hidden><i></i></div>
 </div></div>
 
-<script src="leaflet.js"></script><!-- Leaflet 1.9.4, bundled -->
+<script src="leaflet.js?v=1"></script><!-- Leaflet 1.9.4, bundled -->
 <script src="supabase.js"></script><!-- @supabase/supabase-js 2.45.4, bundled -->
 <script>
 const SUPABASE_URL = "https://rbkqimfaxgcoajugvxeb.supabase.co";
@@ -220,7 +220,7 @@ const SUPABASE_KEY = "sb_publishable_zFRS1IrsmuG66Rh2HLIfeQ_e-phczF6";
 const CATS = [["cafe","کافێ","Café"],["restaurant","چێشتخانە","Restaurant"],["fast_food","خواردنی خێرا","Fast food"],["bar","بار","Bar"],["lounge","لاونج","Lounge"],["hotel","هوتێل","Hotel"],["dessert","شیرینی","Desserts"],["bakery","نانەواخانە","Bakery"],["other","تر","Other"]];
 const TXT = {
   logout:["چوونەدەرەوە","Log out"], loginTitle:["چوونەژوورەوەی ڕووپێوکار","Surveyor sign in"], email:["ئیمەیڵ","Email"], password:["وشەی نهێنی","Password"], signIn:["چوونەژوورەوە","Sign in"],
-  todayChanges:["گۆڕانکاری ئەمڕۆ","Changes today"], tabAll:["هەموو","All"], tabMap:["نەخشە","Map"], sortNear:["نزیکترین","Nearest first"], showMore:["زیاتر پیشان بدە","Show more"], countN:["{n} شوێن","{n} places"], fAll:["هەمووی","All"], fNoPhoto:["بێ وێنە","No photos"], editBtn:["دەستکاری","Edit"], mapLegend:["پرتەقاڵی: وێنەی هەیە · خۆڵەمێشی: هێشتا وێنەی نییە. دەست لە خاڵێک بدە بۆ دەستکاری.","Orange: has photos · Grey: no photos yet. Tap a dot to edit."], tabLatest:["نوێترین","Latest"], latestHint:["دوایین گۆڕانکارییەکان لەلایەن هەموو تیمەکەوە.","The latest changes by the whole team."], editedAt:["گۆڕدرا {d}","Changed {d}"], tabNew:["+ شوێنی نوێ","+ New place"],
+  todayChanges:["گۆڕانکاری ئەمڕۆ","Changes today"], newVersion:["وەشانی نوێ ئامادەیە — دەست لێرە بدە بۆ نوێکردنەوە","New version ready — tap to update"], tabAll:["هەموو","All"], tabMap:["نەخشە","Map"], sortNear:["نزیکترین","Nearest first"], showMore:["زیاتر پیشان بدە","Show more"], countN:["{n} شوێن","{n} places"], fAll:["هەمووی","All"], fNoPhoto:["بێ وێنە","No photos"], editBtn:["دەستکاری","Edit"], mapLegend:["پرتەقاڵی: وێنەی هەیە · خۆڵەمێشی: هێشتا وێنەی نییە. دەست لە خاڵێک بدە بۆ دەستکاری.","Orange: has photos · Grey: no photos yet. Tap a dot to edit."], tabLatest:["نوێترین","Latest"], latestHint:["دوایین گۆڕانکارییەکان لەلایەن هەموو تیمەکەوە.","The latest changes by the whole team."], editedAt:["گۆڕدرا {d}","Changed {d}"], tabNew:["+ شوێنی نوێ","+ New place"],
   refreshNear:["نوێکردنەوە","Refresh"], searchPh:["ناوی شوێنێک بنووسە…","Type a place name…"], noneNear:["لەم نزیکانە هیچ شوێنێک نییە. شوێنی نوێ زیاد بکە.","No places near you. Add a new one."], noneFound:["هیچ نەدۆزرایەوە.","Nothing found."],
   photosN:["{n} وێنە","{n} photos"], back:["گەڕانەوە","Back"], newTitle:["شوێنی نوێ","New place"],
   location:["شوێن","Location"], locHintNew:["لە بەردەم دەرگای شوێنەکە ڕاوەستە و «شوێنی ئێستام» دابگرە، یان لەسەر نەخشە هەڵیبژێرە.","Stand at the entrance and tap “Use my location”, or pick it on the map."], locHintEdit:["ئەگەر شوێنەکە هەڵەیە، لە بەردەم دەرگاکە «شوێنی ئێستام» دابگرە یان لەسەر نەخشە ڕاستی بکەرەوە.","If the location is wrong, tap “Use my location” at the entrance or fix it on the map."],
@@ -244,6 +244,23 @@ const LI = () => lang === "ckb" ? 0 : 1;
 const t = (k, a = {}) => (TXT[k] ? TXT[k][LI()] : k).replace(/\{(\w+)\}/g, (_, x) => a[x] ?? "");
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ---------- new version notice ----------
+const BUILD = "2026-10-22.4";
+async function checkVersion() {
+  try {
+    const r = await fetch("version.txt?t=" + Date.now(), { cache: "no-store" });
+    const v = (await r.text()).trim();
+    if (r.ok && v && v !== BUILD && !$("#newVer")) {
+      const b = document.createElement("button"); b.id = "newVer"; b.type = "button"; b.className = "primary";
+      b.style.cssText = "position:fixed;top:72px;left:16px;right:16px;z-index:1000;box-shadow:0 6px 20px #0004";
+      b.textContent = t("newVersion"); b.onclick = () => location.replace(location.pathname + "?v=" + encodeURIComponent(v));
+      document.body.appendChild(b);
+    }
+  } catch {}
+}
+checkVersion(); setInterval(checkVersion, 60000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkVersion(); });
 
 let sb = null;
 try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { document.body.insertAdjacentHTML("afterbegin", '<div class="msg err">Could not load. Check the internet connection and reload.</div>'); }
