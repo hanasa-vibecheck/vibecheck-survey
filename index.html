@@ -59,6 +59,9 @@ button:disabled{opacity:.5}
 .maptools button.on{background:#1E1630;color:#fff}
 .pickbtns{display:flex;gap:8px;margin-top:10px}
 .pickbtns button{flex:1}
+.chips button.f{padding:6px 12px;min-height:0;font-size:13.5px;font-weight:700;border-radius:999px;background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.chips button.f.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.popbtn{margin-top:6px;padding:6px 12px;min-height:0;font-size:13px;border-radius:999px;background:#E2573B;color:#fff}
 .vdot{width:12px;height:12px;border-radius:50%;background:#6C6280;border:2px solid #fff;box-shadow:0 0 2px #0007}
 .leaflet-container{font-family:"DM Sans","Noto Sans Arabic",sans-serif}
 
@@ -112,22 +115,28 @@ button:disabled{opacity:.5}
       <div class="hint" id="who" style="margin:0"></div>
     </div>
     <div class="tabs" role="tablist">
-      <button type="button" data-tab="near" class="on" data-t="tabNear"></button>
-      <button type="button" data-tab="search" data-t="tabSearch"></button>
+      <button type="button" data-tab="all" class="on" data-t="tabAll"></button>
+      <button type="button" data-tab="map" data-t="tabMap"></button>
       <button type="button" data-tab="latest" data-t="tabLatest"></button>
       <button type="button" data-tab="new" data-t="tabNew"></button>
     </div>
-    <div id="nearBox">
-      <div class="loc" style="margin-bottom:10px"><button class="ghost small" type="button" id="nearBtn" data-t="refreshNear"></button><span id="nearState" class="pill wait" hidden></span></div>
-      <div id="nearList"></div>
+    <div id="allBox">
+      <input id="q" type="search" data-ph="searchPh" style="margin-bottom:10px">
+      <div class="chips" id="catF" style="margin-bottom:10px"></div>
+      <div class="loc" style="margin-bottom:10px"><span id="allCount" class="hint" style="margin:0"></span><span class="grow"></span><button class="ghost small" type="button" id="nearBtn" data-t="sortNear"></button><span id="nearState" class="pill wait" hidden></span></div>
+      <div id="allList"></div>
+      <button class="ghost" type="button" id="moreBtn" style="width:100%" data-t="showMore" hidden></button>
+    </div>
+    <div id="mapBox" hidden>
+      <div class="mapwrap" style="height:70vh">
+        <div id="allMap" style="position:absolute;inset:0;direction:ltr"></div>
+        <div class="maptools"><button type="button" id="aLayMap" class="on" data-t="layMap"></button><button type="button" id="aLaySat" data-t="laySat"></button></div>
+      </div>
+      <p class="hint" style="margin-top:8px" data-t="mapLegend"></p>
     </div>
     <div id="latestBox" hidden>
       <p class="hint" data-t="latestHint"></p>
       <div id="latestList"></div>
-    </div>
-    <div id="searchBox" hidden>
-      <input id="q" type="search" data-ph="searchPh" style="margin-bottom:10px">
-      <div id="searchList"></div>
     </div>
     <div id="homeMsg"></div>
   </section>
@@ -211,7 +220,7 @@ const SUPABASE_KEY = "sb_publishable_zFRS1IrsmuG66Rh2HLIfeQ_e-phczF6";
 const CATS = [["cafe","کافێ","Café"],["restaurant","چێشتخانە","Restaurant"],["fast_food","خواردنی خێرا","Fast food"],["bar","بار","Bar"],["lounge","لاونج","Lounge"],["hotel","هوتێل","Hotel"],["dessert","شیرینی","Desserts"],["bakery","نانەواخانە","Bakery"],["other","تر","Other"]];
 const TXT = {
   logout:["چوونەدەرەوە","Log out"], loginTitle:["چوونەژوورەوەی ڕووپێوکار","Surveyor sign in"], email:["ئیمەیڵ","Email"], password:["وشەی نهێنی","Password"], signIn:["چوونەژوورەوە","Sign in"],
-  todayChanges:["گۆڕانکاری ئەمڕۆ","Changes today"], tabNear:["نزیک","Nearby"], tabSearch:["گەڕان","Search"], tabLatest:["نوێترین","Latest"], latestHint:["دوایین گۆڕانکارییەکان لەلایەن هەموو تیمەکەوە.","The latest changes by the whole team."], editedAt:["گۆڕدرا {d}","Changed {d}"], tabNew:["+ شوێنی نوێ","+ New place"],
+  todayChanges:["گۆڕانکاری ئەمڕۆ","Changes today"], tabAll:["هەموو","All"], tabMap:["نەخشە","Map"], sortNear:["نزیکترین","Nearest first"], showMore:["زیاتر پیشان بدە","Show more"], countN:["{n} شوێن","{n} places"], fAll:["هەمووی","All"], fNoPhoto:["بێ وێنە","No photos"], editBtn:["دەستکاری","Edit"], mapLegend:["پرتەقاڵی: وێنەی هەیە · خۆڵەمێشی: هێشتا وێنەی نییە. دەست لە خاڵێک بدە بۆ دەستکاری.","Orange: has photos · Grey: no photos yet. Tap a dot to edit."], tabLatest:["نوێترین","Latest"], latestHint:["دوایین گۆڕانکارییەکان لەلایەن هەموو تیمەکەوە.","The latest changes by the whole team."], editedAt:["گۆڕدرا {d}","Changed {d}"], tabNew:["+ شوێنی نوێ","+ New place"],
   refreshNear:["نوێکردنەوە","Refresh"], searchPh:["ناوی شوێنێک بنووسە…","Type a place name…"], noneNear:["لەم نزیکانە هیچ شوێنێک نییە. شوێنی نوێ زیاد بکە.","No places near you. Add a new one."], noneFound:["هیچ نەدۆزرایەوە.","Nothing found."],
   photosN:["{n} وێنە","{n} photos"], back:["گەڕانەوە","Back"], newTitle:["شوێنی نوێ","New place"],
   location:["شوێن","Location"], locHintNew:["لە بەردەم دەرگای شوێنەکە ڕاوەستە و «شوێنی ئێستام» دابگرە، یان لەسەر نەخشە هەڵیبژێرە.","Stand at the entrance and tap “Use my location”, or pick it on the map."], locHintEdit:["ئەگەر شوێنەکە هەڵەیە، لە بەردەم دەرگاکە «شوێنی ئێستام» دابگرە یان لەسەر نەخشە ڕاستی بکەرەوە.","If the location is wrong, tap “Use my location” at the entrance or fix it on the map."],
@@ -241,9 +250,9 @@ try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { docu
 const publicUrl = path => sb.storage.from("venues").getPublicUrl(path).data.publicUrl;
 
 // ---------- state ----------
-let view = "home", tab = "near";
+let view = "home", tab = "all";
 let me = null, here = null;           // here = {lat,lng,accuracy}
-let nearList = [], searchList = [], photoCounts = {};
+let all = [], allById = {}, lastSync = "1970", shown = 60, catF = null, photoCounts = {};
 let cur = null;                        // venue being edited (null = new)
 let cat = null, pos = null, watchId = null;
 const files = {};
@@ -279,21 +288,48 @@ const catLabel = c => (CATS.find(x => x[0] === c) || [, "", ""])[lang === "ckb" 
 document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => {
   if (b.dataset.tab === "new") return openEdit(null);
   tab = b.dataset.tab; render();
-  if (tab === "search") $("#q").focus();
-  if (tab === "latest") loadLatest();
+  if (tab === "map") showAllMap();
 });
+const norm = s => String(s || "").toLowerCase().replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/ة/g, "ە").replace(/[ً-ْ]/g, "").trim();
+function filtered() {
+  const q = norm($("#q").value);
+  const list = all.filter(v => (!catF || (catF === "nophoto" ? !photoCounts[v.id] && !v.logo_path : v.category === catF))
+    && (!q || [v.name, v.name_en, v.name_ckb, v.name_ar].some(n => n && norm(n).includes(q))));
+  if (here) list.sort((a, b) => dist(here, a) - dist(here, b)); else list.sort((a, b) => a.name.localeCompare(b.name));
+  return list;
+}
+function latest() {
+  return all.filter(v => new Date(v.updated_at) - new Date(v.created_at) > 60000 || new Date(v.created_at) > new Date("2026-10-22T15:00:00Z"))
+    .sort((a, b) => (b.updated_at > a.updated_at ? 1 : -1)).slice(0, 40);
+}
+function renderFilters() {
+  const box = $("#catF"); box.innerHTML = "";
+  const opts = [[null, t("fAll")], ["nophoto", t("fNoPhoto")], ...CATS.filter(c => all.some(v => v.category === c[0])).map(c => [c[0], catLabel(c[0])])];
+  for (const [k, label] of opts) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "f" + (catF === k ? " on" : ""); b.textContent = label;
+    b.onclick = () => { catF = k; shown = 60; render(); }; box.appendChild(b);
+  }
+}
 function render() {
   document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-  $("#nearBox").hidden = tab !== "near"; $("#searchBox").hidden = tab !== "search"; $("#latestBox").hidden = tab !== "latest";
-  renderList("#latestList", latestList, "", true);
-  renderList("#nearList", nearList, here ? t("noneNear") : "");
-  renderList("#searchList", searchList, $("#q").value.trim().length >= 2 ? t("noneFound") : "");
+  $("#allBox").hidden = tab !== "all"; $("#mapBox").hidden = tab !== "map"; $("#latestBox").hidden = tab !== "latest";
+  if (tab === "all") {
+    const list = filtered();
+    $("#allCount").textContent = all.length ? t("countN", { n: list.length }) : t("locating").replace(/.*/, "…");
+    renderFilters();
+    renderList("#allList", list.slice(0, shown), all.length ? t("noneFound") : "");
+    $("#moreBtn").hidden = list.length <= shown;
+  }
+  if (tab === "latest") renderList("#latestList", latest(), "", true);
   const st = $("#nearState");
   if (watchId !== null && !here) { st.hidden = false; st.className = "pill wait"; st.textContent = t("locating"); }
   else if (here) { st.hidden = false; st.className = "pill " + (here.accuracy <= 30 ? "good" : "wait"); st.textContent = t("accuracy", { m: Math.round(here.accuracy) }); }
   else st.hidden = true;
   renderEditLoc(); renderCats();
 }
+$("#moreBtn").onclick = () => { shown += 60; render(); };
+let qTimer = null;
+$("#q").oninput = () => { clearTimeout(qTimer); qTimer = setTimeout(() => { shown = 60; render(); }, 200); };
 function renderList(sel, list, emptyText, showTime) {
   const box = $(sel); box.innerHTML = "";
   if (!list.length) { if (emptyText) box.innerHTML = `<p class="hint">${esc(emptyText)}</p>`; return; }
@@ -302,7 +338,7 @@ function renderList(sel, list, emptyText, showTime) {
     const alt = [v.name_en, v.name_ckb, v.name_ar].filter(x => x && x !== v.name)[0];
     const d = here ? " · " + fmtD(dist(here, v)) : "";
     const pic = v.logo_path || firstPhoto[v.id];
-    const logo = pic ? `<img alt="" src="${esc(publicUrl(pic))}">` : esc((v.name || "?").slice(0, 2).toUpperCase());
+    const logo = pic ? `<img alt="" loading="lazy" src="${esc(publicUrl(pic))}">` : esc((v.name || "?").slice(0, 2).toUpperCase());
     const when = showTime && v.updated_at ? `<br><small>${esc(t("editedAt", { d: new Date(v.updated_at).toLocaleString(lang === "ckb" ? "ckb-IQ" : "en-GB", { dateStyle: "short", timeStyle: "short" }) }))}</small>` : "";
     b.innerHTML = `<span class="logo">${logo}</span><span class="grow"><b>${esc(v.name)}</b>${alt ? `<small>${esc(alt)}</small><br>` : ""}<small>${esc(catLabel(v.category))}${d} · ${esc(t("photosN", { n: photoCounts[v.id] || 0 }))}</small>${when}</span>`;
     b.onclick = () => openEdit(v);
@@ -310,31 +346,75 @@ function renderList(sel, list, emptyText, showTime) {
   }
 }
 const COLS = "id,name,name_ckb,name_ar,name_en,category,lat,lng,phone,instagram,opening_hours,logo_path,created_at,updated_at";
-let latestList = []; const firstPhoto = {};
-async function loadCounts(list, fresh) {
-  const ids = list.map(v => v.id).filter(id => fresh || !(id in photoCounts));
-  if (!ids.length) return;
-  const { data } = await sb.from("venue_photos").select("venue_id,path").in("venue_id", ids).order("created_at", { ascending: false });
-  ids.forEach(id => { photoCounts[id] = 0; delete firstPhoto[id]; });
-  (data || []).forEach(r => { photoCounts[r.venue_id] = (photoCounts[r.venue_id] || 0) + 1; if (!firstPhoto[r.venue_id]) firstPhoto[r.venue_id] = r.path; });
-  render();
+const firstPhoto = {};
+// Every place in the database (about 1,400), loaded once and then kept up to date.
+async function loadAll() {
+  const rows = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await sb.from("venues").select(COLS).eq("hidden", false).order("id").range(from, from + 999);
+    if (error) return showMsg("#homeMsg", t("failed"), "err");
+    rows.push(...data); if (data.length < 1000) break;
+  }
+  all = rows; allById = Object.fromEntries(rows.map(v => [v.id, v]));
+  rows.forEach(v => { if (v.updated_at > lastSync) lastSync = v.updated_at; });
+  await loadPhotos(); render(); drawAllMap();
 }
-async function loadLatest() {
-  const { data } = await sb.from("venues").select(COLS).eq("hidden", false).gt("updated_at", new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString()).order("updated_at", { ascending: false }).limit(40);
-  latestList = (data || []).filter(v => new Date(v.updated_at) - new Date(v.created_at) > 60000 || new Date(v.created_at) > new Date("2026-10-22T15:00:00Z"));
-  render(); loadCounts(latestList, true);
+async function loadPhotos() {
+  const { data } = await sb.from("venue_photos").select("venue_id,path").order("created_at", { ascending: false }).limit(20000);
+  if (!data) return;
+  for (const k in firstPhoto) delete firstPhoto[k];
+  photoCounts = {};
+  data.forEach(r => { photoCounts[r.venue_id] = (photoCounts[r.venue_id] || 0) + 1; if (!firstPhoto[r.venue_id]) firstPhoto[r.venue_id] = r.path; });
 }
-// Refresh the lists every 20 seconds while the page is open, so the team's changes appear.
-setInterval(() => { if (me && view === "home" && !document.hidden) { loadLatest(); if (here) loadNear(true); } }, 20000);
-async function loadNear(fresh) {
-  if (!here) return;
-  const dLat = 0.0045, dLng = 0.0055; // about 500 m
-  const { data, error } = await sb.from("venues").select(COLS).eq("hidden", false)
-    .gte("lat", here.lat - dLat).lte("lat", here.lat + dLat).gte("lng", here.lng - dLng).lte("lng", here.lng + dLng).limit(200);
-  if (error) return showMsg("#homeMsg", t("failed"), "err");
-  nearList = (data || []).sort((a, b) => dist(here, a) - dist(here, b)).slice(0, 40);
-  render(); loadCounts(nearList, fresh);
+function putVenue(v) {
+  if (v.hidden) delete allById[v.id]; else allById[v.id] = v;
+  if (v.updated_at > lastSync) lastSync = v.updated_at;
+  all = Object.values(allById);
 }
+async function syncChanges() {
+  const { data } = await sb.from("venues").select(COLS + ",hidden").gt("updated_at", lastSync).order("updated_at").limit(500);
+  (data || []).forEach(putVenue);
+  await loadPhotos(); render(); drawAllMap();
+}
+// The team's changes appear on everyone's page within 20 seconds.
+setInterval(() => { if (me && all.length && view === "home" && !document.hidden) syncChanges(); }, 20000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && me && all.length) syncChanges(); });
+
+// ---------- map of every place ----------
+let amap = null, aMapT = null, aSatT = null, aDots = null, meDot = null;
+function showAllMap() {
+  if (typeof L === "undefined") return;
+  if (!amap) {
+    amap = L.map("allMap", { preferCanvas: true, maxZoom: 20 });
+    aMapT = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 20, maxNativeZoom: 19, attribution: "© OpenStreetMap" }).addTo(amap);
+    aSatT = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, maxNativeZoom: 19, attribution: "Imagery © Esri" });
+    aDots = L.layerGroup().addTo(amap);
+    const c = here || { lat: 35.5617, lng: 45.4329 };
+    amap.setView([c.lat, c.lng], here ? 16 : 13);
+    drawAllMap();
+  }
+  setTimeout(() => amap.invalidateSize(), 50);
+}
+function drawAllMap() {
+  if (!amap) return;
+  aDots.clearLayers();
+  for (const v of all) {
+    const has = photoCounts[v.id] || v.logo_path;
+    const m = L.circleMarker([v.lat, v.lng], { radius: 7, weight: 2, color: "#fff", fillColor: has ? "#E2573B" : "#6C6280", fillOpacity: 1 });
+    m.bindPopup(() => {
+      const d = document.createElement("div");
+      d.innerHTML = `<b>${esc(v.name)}</b><br><small>${esc(catLabel(v.category))} · ${esc(t("photosN", { n: photoCounts[v.id] || 0 }))}</small><br>`;
+      const b = document.createElement("button"); b.type = "button"; b.className = "popbtn"; b.textContent = t("editBtn");
+      b.onclick = () => { amap.closePopup(); openEdit(allById[v.id] || v); };
+      d.appendChild(b); return d;
+    });
+    m.addTo(aDots);
+  }
+  if (here) { meDot && meDot.remove(); meDot = L.circleMarker([here.lat, here.lng], { radius: 8, weight: 3, color: "#fff", fillColor: "#2D7FF9", fillOpacity: 1 }).addTo(amap); }
+}
+$("#aLayMap").onclick = () => { if (!amap) return; amap.removeLayer(aSatT); aMapT.addTo(amap); $("#aLayMap").classList.add("on"); $("#aLaySat").classList.remove("on"); };
+$("#aLaySat").onclick = () => { if (!amap) return; amap.removeLayer(aMapT); aSatT.addTo(amap); $("#aLaySat").classList.add("on"); $("#aLayMap").classList.remove("on"); };
+
 function locate(cb) {
   if (!navigator.geolocation) return showMsg(view === "edit" ? "#formMsg" : "#homeMsg", t("locDenied"), "err");
   if (watchId !== null) navigator.geolocation.clearWatch(watchId);
@@ -347,20 +427,7 @@ function locate(cb) {
   }, () => { watchId = null; render(); showMsg(view === "edit" ? "#formMsg" : "#homeMsg", t("locDenied"), "err"); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
   render();
 }
-$("#nearBtn").onclick = () => locate((p, final) => { const first = !here; here = p; render(); if (first || final) loadNear(); });
-let qTimer = null;
-$("#q").oninput = () => {
-  clearTimeout(qTimer);
-  qTimer = setTimeout(async () => {
-    const q = $("#q").value.trim().replace(/[%,()]/g, " ");
-    if (q.length < 2) { searchList = []; return render(); }
-    const like = `%${q}%`;
-    const { data } = await sb.from("venues").select(COLS).eq("hidden", false)
-      .or(`name.ilike.${like},name_en.ilike.${like},name_ckb.ilike.${like},name_ar.ilike.${like}`).limit(40);
-    searchList = data || []; if (here) searchList.sort((a, b) => dist(here, a) - dist(here, b));
-    render(); loadCounts(searchList);
-  }, 300);
-};
+$("#nearBtn").onclick = () => locate((p, final) => { here = p; render(); if (final) drawAllMap(); });
 
 // ---------- edit / new ----------
 async function openEdit(v) {
@@ -382,7 +449,7 @@ async function openEdit(v) {
   if (!v && here && here.accuracy <= 30) pos = here;
   renderEditLoc();
 }
-$("#backBtn").onclick = () => { show("home"); render(); if (here) loadNear(true); if (tab === "latest") loadLatest(); };
+$("#backBtn").onclick = () => { show("home"); render(); if (tab === "map") showAllMap(); syncChanges(); };
 function renderEditLoc() {
   if (view !== "edit") return;
   $("#locHint").textContent = cur ? t("locHintEdit") : t("locHintNew");
@@ -523,9 +590,9 @@ $("#saveBtn").onclick = async () => {
       }
       bar.style.width = `${Math.round(++done / total * 100)}%`;
     }
-    [nearList, searchList].forEach(list => { const i = list.findIndex(x => x.id === venue.id); if (i >= 0) list[i] = venue; else if (list === nearList && !cur) list.unshift(venue); });
-    loadToday(); loadLatest(); loadCounts([venue], true);
-    show("home"); render(); showMsg("#homeMsg", t("saved"), "ok");
+    putVenue(venue); await loadPhotos(); drawAllMap();
+    loadToday();
+    show("home"); render(); if (tab === "map") showAllMap(); showMsg("#homeMsg", t("saved"), "ok");
   } catch (e) {
     console.error(e);
     showMsg("#formMsg", /row-level security|admin_only/.test(String(e?.message)) ? t("notSurveyor") : t("failed"), "err");
@@ -549,6 +616,7 @@ async function refreshAuth() {
   $("#who").textContent = me.email;
   if (view === "login") show("home");
   render(); loadToday();
+  if (!all.length) loadAll();
   if (!here) $("#nearBtn").click();
 }
 $("#loginForm").onsubmit = async e => {
