@@ -164,7 +164,8 @@ button:disabled{opacity:.5}
 </main>
 <div class="viewer" id="viewer" hidden><img alt=""></div>
 
-<script src="../supabase.js"></script><!-- @supabase/supabase-js 2.45.4, bundled -->
+<script src="../supabase.js"></script>
+<script src="../reset.js?v=1"></script><!-- @supabase/supabase-js 2.45.4, bundled -->
 <script>
 "use strict";
 const SUPABASE_URL = "https://rbkqimfaxgcoajugvxeb.supabase.co";
@@ -402,7 +403,7 @@ async function setVenue(btn, v, fields) {
 async function loadTeam() {
   const { data, error } = await sb.rpc("admin_team");
   if (error) { teamOk = false; $("#setupMsg").innerHTML = `<div class="msg err">${esc(t("needSql"))}</div>`; team = []; }
-  else { teamOk = true; $("#setupMsg").innerHTML = ""; team = data || []; }
+  else { teamOk = true; $("#setupMsg").innerHTML = ""; team = Array.isArray(data) ? data : []; }
   render();
 }
 function renderTeam() {

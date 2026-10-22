@@ -213,7 +213,8 @@ button:disabled{opacity:.5}
 </div></div>
 
 <script src="leaflet.js?v=1"></script><!-- Leaflet 1.9.4, bundled -->
-<script src="supabase.js"></script><!-- @supabase/supabase-js 2.45.4, bundled -->
+<script src="supabase.js"></script>
+<script src="reset.js?v=1"></script><!-- @supabase/supabase-js 2.45.4, bundled -->
 <script>
 const SUPABASE_URL = "https://rbkqimfaxgcoajugvxeb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_zFRS1IrsmuG66Rh2HLIfeQ_e-phczF6";
@@ -246,7 +247,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 // ---------- new version notice ----------
-const BUILD = "2026-10-22.4";
+const BUILD = "2026-10-22.5";
 async function checkVersion() {
   try {
     const r = await fetch("version.txt?t=" + Date.now(), { cache: "no-store" });
@@ -370,6 +371,7 @@ async function loadAll() {
   for (let from = 0; ; from += 1000) {
     const { data, error } = await sb.from("venues").select(COLS).eq("hidden", false).order("id").range(from, from + 999);
     if (error) return showMsg("#homeMsg", t("failed"), "err");
+    if (!Array.isArray(data)) break;
     rows.push(...data); if (data.length < 1000) break;
   }
   all = rows; allById = Object.fromEntries(rows.map(v => [v.id, v]));
