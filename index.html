@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&family=DM+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="leaflet.css">
 <style>
 :root{--coral:#E2573B;--ink:#1E1630;--bg:#F6F3F8;--card:#fff;--line:#E0D8E8;--muted:#6C6280;--ok:#1F8A5B;--err:#C0392B}
 @media (prefers-color-scheme:dark){:root{--ink:#F2ECFA;--bg:#130E1E;--card:#1D1630;--line:#33294A;--muted:#A79BBD;--coral:#FF7A5C}}
@@ -47,7 +48,20 @@ button:disabled{opacity:.5}
 .photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .slot{position:relative;aspect-ratio:1;border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;font-weight:600;color:var(--muted);overflow:hidden;cursor:pointer;background:var(--card);padding:4px}
 .slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.slot input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.slot input{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2}
+.slot span::before{content:"+";display:block;font-size:26px;line-height:1;font-weight:400;margin-bottom:4px}
+.picker{margin-top:12px}
+.mapwrap{position:relative;height:340px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+#pickMap{position:absolute;inset:0;direction:ltr}
+.crosshair{position:absolute;left:50%;top:50%;z-index:500;pointer-events:none;width:34px;height:46px;transform:translate(-50%,-100%)}
+.maptools{position:absolute;top:8px;z-index:600;inset-inline-start:8px;display:flex;gap:6px}
+.maptools button{background:#fff;color:#1E1630;border:1px solid #ccc;border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;min-height:0}
+.maptools button.on{background:#1E1630;color:#fff}
+.pickbtns{display:flex;gap:8px;margin-top:10px}
+.pickbtns button{flex:1}
+.vdot{width:12px;height:12px;border-radius:50%;background:#6C6280;border:2px solid #fff;box-shadow:0 0 2px #0007}
+.leaflet-container{font-family:"DM Sans","Noto Sans Arabic",sans-serif}
+
 .have{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}
 .have img{width:76px;height:76px;object-fit:cover;border-radius:10px;flex:none;background:var(--line)}
 .check{display:flex;gap:10px;align-items:flex-start;font-weight:600}
@@ -123,7 +137,17 @@ button:disabled{opacity:.5}
         <div class="loc">
           <button class="ghost small" type="button" id="locBtn" data-t="useMyLoc"></button>
           <span id="locState" class="pill wait" hidden></span>
+          <button class="ghost small" type="button" id="pickBtn" data-t="pickOnMap"></button>
           <a id="locMap" class="hint" target="_blank" rel="noopener" data-t="checkMap"></a>
+        </div>
+        <div class="picker" id="picker" hidden>
+          <p class="hint" data-t="pickHint"></p>
+          <div class="mapwrap">
+            <div id="pickMap"></div>
+            <svg class="crosshair" viewBox="0 0 34 46" aria-hidden="true"><path d="M17 45C17 45 2 27 2 16a15 15 0 0 1 30 0c0 11-15 29-15 29z" fill="#E2573B" stroke="#fff" stroke-width="2.5"/><circle cx="17" cy="16" r="5.5" fill="#fff"/></svg>
+            <div class="maptools"><button type="button" id="layMap" class="on" data-t="layMap"></button><button type="button" id="laySat" data-t="laySat"></button></div>
+          </div>
+          <div class="pickbtns"><button type="button" class="primary" id="pickOk" data-t="pickOk"></button><button type="button" class="ghost" id="pickCancel" data-t="cancel"></button></div>
         </div>
       </div>
       <div class="card">
@@ -174,6 +198,7 @@ button:disabled{opacity:.5}
   <div class="progress" id="prog" hidden><i></i></div>
 </div></div>
 
+<script src="leaflet.js"></script><!-- Leaflet 1.9.4, bundled -->
 <script src="supabase.js"></script><!-- @supabase/supabase-js 2.45.4, bundled -->
 <script>
 const SUPABASE_URL = "https://rbkqimfaxgcoajugvxeb.supabase.co";
@@ -184,23 +209,25 @@ const TXT = {
   todayChanges:["گۆڕانکاری ئەمڕۆ","Changes today"], tabNear:["نزیک","Nearby"], tabSearch:["گەڕان","Search"], tabNew:["+ شوێنی نوێ","+ New place"],
   refreshNear:["نوێکردنەوە","Refresh"], searchPh:["ناوی شوێنێک بنووسە…","Type a place name…"], noneNear:["لەم نزیکانە هیچ شوێنێک نییە. شوێنی نوێ زیاد بکە.","No places near you. Add a new one."], noneFound:["هیچ نەدۆزرایەوە.","Nothing found."],
   photosN:["{n} وێنە","{n} photos"], back:["گەڕانەوە","Back"], newTitle:["شوێنی نوێ","New place"],
-  location:["شوێن","Location"], locHintNew:["لە بەردەم دەرگای شوێنەکە ڕاوەستە و دوگمەکە دابگرە.","Stand at the entrance and tap the button."], locHintEdit:["ئەگەر شوێنەکە لەسەر نەخشە هەڵەیە، لە بەردەم دەرگاکە ڕاوەستە و دوگمەکە دابگرە.","If the map pin is wrong, stand at the entrance and tap the button."],
-  useMyLoc:["شوێنی ئێستام","Use my location"], checkMap:["بینین لەسەر نەخشە","Check on map"],
+  location:["شوێن","Location"], locHintNew:["لە بەردەم دەرگای شوێنەکە ڕاوەستە و «شوێنی ئێستام» دابگرە، یان لەسەر نەخشە هەڵیبژێرە.","Stand at the entrance and tap “Use my location”, or pick it on the map."], locHintEdit:["ئەگەر شوێنەکە هەڵەیە، لە بەردەم دەرگاکە «شوێنی ئێستام» دابگرە یان لەسەر نەخشە ڕاستی بکەرەوە.","If the location is wrong, tap “Use my location” at the entrance or fix it on the map."],
+  useMyLoc:["شوێنی ئێستام","Use my location"], pickOnMap:["هەڵبژاردن لەسەر نەخشە","Pick on map"],
+  pickHint:["نەخشەکە بجوڵێنە تا نیشانە سوورەکە ڕێک لەسەر دەرگای شوێنەکە بێت. خاڵە خۆڵەمێشییەکان شوێنی هەبوون.","Move the map until the red pin sits exactly on the entrance. Grey dots are places we already have."],
+  layMap:["نەخشە","Map"], laySat:["ئاسمانی","Satellite"], pickOk:["ئەم شوێنە دابنێ","Use this spot"], cancel:["پاشگەزبوونەوە","Cancel"], pickedOnMap:["لەسەر نەخشە هەڵبژێردرا","Picked on map"], checkMap:["بینین لەسەر نەخشە","Check on map"],
   names:["ناو","Name"], nameOrig:["ناو وەک لەسەر تابلۆکە نووسراوە *","Name exactly as on the sign *"], nameCkb:["ناو بە کوردی","Name in Kurdish"], nameAr:["ناو بە عەرەبی","Name in Arabic"], nameEn:["ناو بە ئینگلیزی","Name in English"],
   type:["جۆر *","Type *"], photos:["لۆگۆ و وێنەکان","Logo & photos"], photoHint:["ڕووناکی ڕۆژ، ئاسۆیی، تابلۆکە ڕوون بێت. ڕووخساری میوانەکان مەگرە.","Daylight, landscape, sign readable. No customers' faces."],
   pFront:["بەردەم و تابلۆ","Front & sign"], pInside:["ناوەوە","Inside"], pTable:["مێز","Table"], pMenu:["مینیو","Menu"], pMore:["زیاتر","More"], pLogo:["لۆگۆ","Logo"],
   consent:["خاوەن یان بەڕێوەبەری شوێنەکە ڕازی بوو بە بەکارهێنانی ئەم وێنانە لە ڤایب چێک","The owner or manager agreed that VibeCheck can use these photos"],
   details:["زانیاری زیاتر","More details"], phone:["ژمارەی تەلەفۆن","Phone number"], hours:["کاتەکانی کارکردن","Opening hours"], hoursPh:["هەموو ڕۆژێک 10:00–24:00","Every day 10:00–24:00"],
   save:["پاشەکەوتکردن","Save"], locating:["چاوەڕێ بە… شوێن دەدۆزرێتەوە","Finding location…"], accuracy:["وردی: {m} م","Accuracy: {m} m"], locDenied:["ڕێگەی شوێن نەدراوە. لە ڕێکخستنەکانی وێبگەڕەکەت ڕێگە بدە.","Location permission denied. Allow it in your browser settings."],
-  needLoc:["سەرەتا شوێن وەربگرە (وردی باشتر لە 50 م).","Get the location first (better than 50 m)."], needName:["ناوی سەر تابلۆکە بنووسە.","Enter the name on the sign."], needCat:["جۆری شوێنەکە هەڵبژێرە.","Choose the type of place."],
+  needLoc:["سەرەتا شوێن دیاری بکە: «شوێنی ئێستام» (وردی باشتر لە 50 م) یان «هەڵبژاردن لەسەر نەخشە».","Set the location first: “Use my location” (better than 50 m) or “Pick on map”."], needName:["ناوی سەر تابلۆکە بنووسە.","Enter the name on the sign."], needCat:["جۆری شوێنەکە هەڵبژێرە.","Choose the type of place."],
   needConsent:["بۆ ناردنی وێنە ڕەزامەندی خاوەنەکە پێویستە.","The owner's agreement is needed to send photos."], sending:["پاشەکەوت دەکرێت…","Saving…"], saved:["پاشەکەوتکرا. سوپاس!","Saved. Thank you!"],
   failed:["پاشەکەوت سەرکەوتوو نەبوو. هێڵی ئینتەرنێت بپشکنە و دووبارە هەوڵ بدەرەوە. هیچ شتێک نەسڕاوەتەوە.","Saving failed. Check the connection and try again. Nothing was lost."],
   badLogin:["ئیمەیڵ یان وشەی نهێنی هەڵەیە.","Wrong email or password."], notSurveyor:["ئەم هەژمارە ڕێگەی ڕووپێوی نییە. پەیوەندی بە هەناسە بکە.","This account is not a surveyor. Contact Hanasa."],
   mOff:["{d}","{d}"]
 };
 let lang = "ckb"; try { lang = localStorage.getItem("vcs_lang") || "ckb"; } catch {}
-const L = () => lang === "ckb" ? 0 : 1;
-const t = (k, a = {}) => (TXT[k] ? TXT[k][L()] : k).replace(/\{(\w+)\}/g, (_, x) => a[x] ?? "");
+const LI = () => lang === "ckb" ? 0 : 1;
+const t = (k, a = {}) => (TXT[k] ? TXT[k][LI()] : k).replace(/\{(\w+)\}/g, (_, x) => a[x] ?? "");
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -320,7 +347,7 @@ $("#q").oninput = () => {
 
 // ---------- edit / new ----------
 async function openEdit(v) {
-  cur = v; cat = v ? v.category : null; pos = null;
+  cur = v; cat = v ? v.category : null; pos = null; closePicker();
   for (const k in files) delete files[k];
   document.querySelectorAll(".slot img").forEach(i => i.remove());
   $("#form").reset(); showMsg("#formMsg", "");
@@ -344,11 +371,61 @@ function renderEditLoc() {
   const st = $("#locState"), map = $("#locMap");
   const p = pos || (cur ? { lat: cur.lat, lng: cur.lng } : null);
   map.hidden = !p; if (p) map.href = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`;
-  if (pos) { st.hidden = false; st.className = "pill " + (pos.accuracy <= 25 ? "good" : pos.accuracy <= 50 ? "wait" : "bad"); st.textContent = t("accuracy", { m: Math.round(pos.accuracy) }); }
+  if (pos && pos.manual) { st.hidden = false; st.className = "pill good"; st.textContent = t("pickedOnMap"); }
+  else if (pos) { st.hidden = false; st.className = "pill " + (pos.accuracy <= 25 ? "good" : pos.accuracy <= 50 ? "wait" : "bad"); st.textContent = t("accuracy", { m: Math.round(pos.accuracy) }); }
   else if (watchId !== null) { st.hidden = false; st.className = "pill wait"; st.textContent = t("locating"); }
   else st.hidden = true;
 }
-$("#locBtn").onclick = () => locate(p => { pos = p; here = here || p; renderEditLoc(); });
+$("#locBtn").onclick = () => { closePicker(); locate(p => { pos = p; here = here || p; renderEditLoc(); }); };
+
+// ---------- pick on map ----------
+let map = null, tileMap = null, tileSat = null, dots = null, dotTimer = null;
+const CITY = { lat: 35.5617, lng: 45.4329 };
+function openPicker() {
+  if (typeof L === "undefined") return;
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  $("#picker").hidden = false;
+  const start = pos || (cur ? { lat: cur.lat, lng: cur.lng } : null) || here || CITY;
+  const z = (pos || cur) ? 19 : here ? 17 : 13;
+  if (!map) {
+    map = L.map("pickMap", { zoomControl: true, attributionControl: true, maxZoom: 20 });
+    tileMap = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 20, maxNativeZoom: 19, attribution: "© OpenStreetMap" });
+    tileSat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, maxNativeZoom: 19, attribution: "Imagery © Esri" });
+    tileMap.addTo(map);
+    dots = L.layerGroup().addTo(map);
+    map.on("moveend", () => { clearTimeout(dotTimer); dotTimer = setTimeout(loadDots, 250); });
+  }
+  map.setView([start.lat, start.lng], z);
+  setTimeout(() => { map.invalidateSize(); loadDots(); }, 50);
+  $("#picker").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function setLayer(sat) {
+  if (!map) return;
+  if (sat) { map.removeLayer(tileMap); tileSat.addTo(map); } else { map.removeLayer(tileSat); tileMap.addTo(map); }
+  $("#layMap").classList.toggle("on", !sat); $("#laySat").classList.toggle("on", sat);
+}
+async function loadDots() {
+  if (!map || $("#picker").hidden || map.getZoom() < 15) { dots && dots.clearLayers(); return; }
+  const b = map.getBounds();
+  const { data } = await sb.from("venues").select("id,name,lat,lng")
+    .gte("lat", b.getSouth()).lte("lat", b.getNorth()).gte("lng", b.getWest()).lte("lng", b.getEast()).limit(300);
+  dots.clearLayers();
+  (data || []).forEach(v => {
+    if (cur && v.id === cur.id) return;
+    L.marker([v.lat, v.lng], { icon: L.divIcon({ className: "", html: '<div class="vdot"></div>', iconSize: [12, 12] }) })
+      .bindTooltip(esc(v.name), { direction: "top" }).addTo(dots);
+  });
+}
+function closePicker() { $("#picker").hidden = true; }
+$("#pickBtn").onclick = openPicker;
+$("#layMap").onclick = () => setLayer(false);
+$("#laySat").onclick = () => setLayer(true);
+$("#pickCancel").onclick = closePicker;
+$("#pickOk").onclick = () => {
+  const c = map.getCenter();
+  pos = { lat: +c.lat.toFixed(7), lng: +c.lng.toFixed(7), accuracy: 0, manual: true };
+  closePicker(); renderEditLoc();
+};
 function renderCats() {
   const box = $("#cats"); box.innerHTML = "";
   for (const [k] of CATS) {
