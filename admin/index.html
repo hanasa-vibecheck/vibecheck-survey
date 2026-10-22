@@ -101,6 +101,7 @@ button:disabled{opacity:.5}
       <button type="button" data-tab="changes" class="on"><span data-t="tabChanges"></span></button>
       <button type="button" data-tab="photos"><span data-t="tabPhotos"></span></button>
       <button type="button" data-tab="places"><span data-t="tabPlaces"></span><span class="n" id="pendN" hidden></span></button>
+      <button type="button" data-tab="claims"><span data-t="tabClaims"></span><span class="n" id="claimN" hidden></span></button>
       <button type="button" data-tab="team"><span data-t="tabTeam"></span></button>
       <button type="button" data-tab="settings"><span data-t="tabSettings"></span></button>
     </div>
@@ -122,6 +123,11 @@ button:disabled{opacity:.5}
       <div class="chips" id="placeF"></div>
       <input id="q" type="search" data-ph="searchPh" style="margin-bottom:10px">
       <div id="placesList"></div>
+    </div>
+
+    <div id="claimsBox" hidden>
+      <p class="hint" data-t="claimsHint"></p>
+      <div id="claimsList"></div>
     </div>
 
     <div id="teamBox" hidden>
@@ -180,7 +186,11 @@ const TXT = {
   logout: ["چوونەدەرەوە", "Log out"], loginTitle: ["چوونەژوورەوەی بەڕێوەبەر", "Admin sign in"], email: ["ئیمەیڵ", "Email"], password: ["وشەی نهێنی", "Password"], signIn: ["چوونەژوورەوە", "Sign in"],
   badLogin: ["ئیمەیڵ یان وشەی نهێنی هەڵەیە.", "Wrong email or password."], notAdmin: ["ئەم پەڕەیە تەنها بۆ بەڕێوەبەرە.", "This page is for admins only."],
   needSql: ["هەندێک بەش کار ناکەن تا فایلی 0003_admin_plans.sql لە Supabase SQL Editor جێبەجێ نەکەیت.", "Some parts need the database update 0003_admin_plans.sql (Supabase → SQL Editor)."],
-  tabChanges: ["گۆڕانکاری", "Changes"], tabPhotos: ["وێنە", "Photos"], tabPlaces: ["شوێن", "Places"], tabTeam: ["تیم", "Team"], tabSettings: ["ڕێکخستن", "Settings"],
+  tabChanges: ["گۆڕانکاری", "Changes"], tabPhotos: ["وێنە", "Photos"], tabPlaces: ["شوێن", "Places"], tabTeam: ["تیم", "Team"], tabClaims: ["خاوەنەکان", "Owners"],
+  claimsHint: ["داواکاری خاوەنی شوێن. پێش پەسەندکردن پەیوەندی بە ژمارەکەوە بکە و مۆڵەت و ناسنامەکە بپشکنە.", "Venue owner claims. Call the number and check the licence and ID before approving."],
+  claimLic: ["مۆڵەت: {x}", "Licence: {x}"], reject: ["ڕەتکردنەوە", "Reject"], rejectWhy: ["هۆکاری ڕەتکردنەوە (بۆ خاوەنەکە)", "Reason for rejecting (shown to the owner)"],
+  approveAsk: ["{who} ببێتە خاوەنی {place}؟ پەیوەندیت پێوە کرد و بەڵگەنامەکانت پشکنی؟", "Make {who} the owner of {place}? Did you call them and check the documents?"],
+  alreadyOwned: ["ئەم شوێنە پێشتر خاوەنی هەیە.", "This place already has an owner."], need0008: ["سەرەتا 0008_reservations.sql لە Supabase ڕەن بکە.", "Run 0008_reservations.sql in Supabase first."], tabSettings: ["ڕێکخستن", "Settings"],
   showMore: ["زیاتر", "Show more"], everyone: ["هەموو", "Everyone"], searchPh: ["ناوی شوێن…", "Place name…"],
   added: ["شوێنی نوێی زیادکرد", "added a new place"], edited: ["دەستکاری کرد", "edited"], undone: ["گەڕێندرایەوە", "Undone"], undo: ["گەڕاندنەوە", "Undo"],
   undoAsk: ["دڵنیایت؟ شوێنەکە دەگەڕێتەوە بۆ پێش ئەم گۆڕانکارییە.", "Sure? The place goes back to how it was before this change."],
@@ -251,7 +261,7 @@ function logoHtml(v) { return v && v.logo_path ? `<img alt="" src="${esc(publicU
 document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { tab = b.dataset.tab; render(); load(); });
 function render() {
   document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-  for (const k of ["changes", "photos", "places", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
+  for (const k of ["changes", "photos", "places", "claims", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
   if (tab === "changes") renderChanges();
   if (tab === "photos") renderPhotos();
   if (tab === "places") renderPlaces();
@@ -263,6 +273,7 @@ function load() {
   if (tab === "places") loadPlaces();
   if (tab === "team") loadTeam();
   if (tab === "settings") loadSettings();
+  if (tab === "claims") loadClaims();
 }
 function chips(sel, opts, cur, on) {
   const box = $(sel); box.innerHTML = "";
@@ -407,6 +418,43 @@ async function setVenue(btn, v, fields) {
   delete venueCache[v.id]; edits = []; showMsg(t("saved")); loadPlaces();
 }
 
+// ---------- owner claims ----------
+async function loadClaims() {
+  const box = $("#claimsList");
+  const { data, error } = await sb.rpc("admin_claims", { p_status: "pending" });
+  if (error) { box.innerHTML = `<div class="msg err">${esc(/function|schema cache/.test(error.message) ? t("need0008") : t("failed"))}</div>`; return; }
+  const list = Array.isArray(data) ? data : [];
+  $("#claimN").hidden = !list.length; $("#claimN").textContent = list.length || "";
+  box.innerHTML = list.length ? "" : `<p class="hint">${t("nothing")}</p>`;
+  for (const c of list) {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<div class="grow"><b>${esc(c.venue_name)}</b>
+      <div class="who">${esc(c.owner_name || "?")} · <a class="ltr" href="tel:${esc(c.contact_phone)}">${esc(c.contact_phone)}</a> · ${esc(when(c.created_at))}</div>
+      <div class="who">${esc(t("claimLic", { x: c.licence_number }))}</div>
+      <div class="grid" style="margin-top:8px" data-docs></div>
+      <div class="acts"><button class="primary small" type="button" data-ok>${t("approve")}</button>
+      <button class="danger small" type="button" data-no>${t("reject")}</button></div></div>`;
+    const docs = d.querySelector("[data-docs]");
+    for (const path of c.documents || []) {
+      sb.storage.from("claims").createSignedUrl(path, 900).then(({ data: u }) => {
+        if (!u) return;
+        const a = document.createElement("a"); a.href = u.signedUrl; a.target = "_blank"; a.rel = "noopener";
+        a.innerHTML = /\.pdf$/i.test(path) ? "PDF" : `<img src="${u.signedUrl}" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px">`;
+        docs.appendChild(a);
+      });
+    }
+    const decide = async (btn, ok, reason) => {
+      btn.disabled = true;
+      const { error } = await sb.rpc("admin_decide_claim", { p_claim: c.id, p_approve: ok, p_reason: reason || null });
+      if (error) { btn.disabled = false; return showMsg(/already_owned/.test(error.message) ? t("alreadyOwned") : t("failed"), "err"); }
+      showMsg(t("saved")); loadClaims();
+    };
+    d.querySelector("[data-ok]").onclick = ev => { if (confirm(t("approveAsk", { who: c.owner_name || "?", place: c.venue_name }))) decide(ev.target, true); };
+    d.querySelector("[data-no]").onclick = ev => { const r = prompt(t("rejectWhy")); if (r !== null) decide(ev.target, false, r.trim()); };
+    box.appendChild(d);
+  }
+}
+
 // ---------- team ----------
 async function loadTeam() {
   const { data, error } = await sb.rpc("admin_team");
@@ -487,7 +535,7 @@ async function refreshAuth() {
   if (!isAdmin) { await sb.auth.signOut(); me = null; show("login"); $("#loginMsg").innerHTML = `<div class="msg err">${esc(t("notAdmin"))}</div>`; return; }
   show("app");
   await loadTeam();
-  loadChanges(); countPending();
+  loadChanges(); countPending(); loadClaims();
 }
 $("#loginForm").onsubmit = async e => {
   e.preventDefault(); $("#loginMsg").innerHTML = "";
