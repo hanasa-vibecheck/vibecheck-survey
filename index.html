@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>VibeCheck Survey</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&family=DM+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--coral:#E2573B;--ink:#1E1630;--bg:#F6F3F8;--card:#fff;--line:#E0D8E8;--muted:#6C6280;--ok:#1F8A5B;--err:#C0392B}
+@media (prefers-color-scheme:dark){:root{--ink:#F2ECFA;--bg:#130E1E;--card:#1D1630;--line:#33294A;--muted:#A79BBD;--coral:#FF7A5C}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Arabic","DM Sans",system-ui,sans-serif;font-size:16px;line-height:1.5}
+body.en{font-family:"DM Sans","Noto Sans Arabic",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.brand{font-family:"DM Sans",sans-serif;font-weight:800;font-size:20px;direction:ltr;display:flex;align-items:center;gap:6px}
+.brand b{color:var(--coral)}
+.grow{flex:1;min-width:0}
+html,body{overflow-x:hidden}
+.sv{font-weight:600;color:var(--muted);font-size:15px}
+@media (max-width:420px){.sv{display:none}header .small{padding:6px 10px;font-size:13px;min-height:38px}}
+main{max-width:560px;margin:0 auto;padding:16px 16px 120px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+h1{font-size:22px;margin:4px 0 12px}
+h2{font-size:16px;margin:0 0 10px}
+label{display:block;font-weight:600;margin:10px 0 6px}
+.hint{color:var(--muted);font-size:13.5px;margin:2px 0 8px}
+input[type=text],input[type=email],input[type=password],input[type=tel],input[type=search],textarea{width:100%;font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+textarea{min-height:70px}
+input:focus,textarea:focus{outline:2px solid var(--coral);border-color:transparent}
+.ltr{direction:ltr;text-align:left}
+button{font:inherit;font-weight:800;border:0;border-radius:14px;padding:14px 16px;min-height:48px;cursor:pointer}
+.primary{background:var(--coral);color:#fff;width:100%}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.small{padding:8px 12px;min-height:40px;font-size:14px}
+button:disabled{opacity:.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 14px;font-weight:600;min-height:40px}
+.chip.on{background:var(--coral);border-color:var(--coral);color:#fff}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px}
+.tabs button{background:transparent;color:var(--ink);padding:10px 6px;min-height:44px;font-size:14.5px}
+.tabs button.on{background:var(--coral);color:#fff}
+.loc{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.pill.good{background:#1F8A5B22;color:var(--ok)}.pill.bad{background:#C0392B22;color:var(--err)}.pill.wait{background:#C98A1422;color:#9a6a0e}
+.photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.slot{position:relative;aspect-ratio:1;border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;font-weight:600;color:var(--muted);overflow:hidden;cursor:pointer;background:var(--card);padding:4px}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.have{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}
+.have img{width:76px;height:76px;object-fit:cover;border-radius:10px;flex:none;background:var(--line)}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:600}
+.check input{width:22px;height:22px;margin-top:2px;accent-color:var(--coral)}
+.msg{padding:12px 14px;border-radius:12px;margin:10px 0;font-weight:600}
+.msg.err{background:#C0392B1a;color:var(--err)}.msg.ok{background:#1F8A5B1a;color:var(--ok)}
+.vrow{display:flex;gap:12px;align-items:center;width:100%;text-align:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;font-weight:400;color:var(--ink);min-height:64px}
+.vrow .logo{width:46px;height:46px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;background:var(--muted);overflow:hidden}
+.vrow .logo img{width:100%;height:100%;object-fit:cover}
+.vrow b{display:block;font-size:15.5px}
+.vrow small{color:var(--muted)}
+.stat{font-size:26px;font-weight:800}
+.bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.bar>div{max-width:560px;margin:0 auto;display:flex;gap:8px}
+.bar .primary{flex:1}
+.progress{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:8px}
+.progress i{display:block;height:100%;background:var(--coral);width:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 100 100" aria-hidden="true"><path d="M20 50 40 70 66 37" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><circle cx="78" cy="23" r="10" fill="#E2573B"/></svg><span>Vibe<b>Check</b></span> <span class="sv">Survey</span></div>
+  <div class="grow"></div>
+  <button class="ghost small" id="langBtn" type="button">English</button>
+  <button class="ghost small" id="outBtn" type="button" hidden data-t="logout"></button>
+</header>
+
+<main>
+  <section id="login" hidden>
+    <h1 data-t="loginTitle"></h1>
+    <div class="card">
+      <form id="loginForm">
+        <label for="email" data-t="email"></label>
+        <input id="email" type="email" class="ltr" autocomplete="username" required>
+        <label for="pass" data-t="password"></label>
+        <input id="pass" type="password" class="ltr" autocomplete="current-password" required>
+        <div id="loginMsg"></div>
+        <button class="primary" type="submit" style="margin-top:14px" data-t="signIn"></button>
+      </form>
+    </div>
+  </section>
+
+  <section id="home" hidden>
+    <div class="card" style="display:flex;align-items:center;gap:16px">
+      <div><div class="stat" id="todayCount">0</div><div class="hint" style="margin:0" data-t="todayChanges"></div></div>
+      <div class="grow"></div>
+      <div class="hint" id="who" style="margin:0"></div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" data-tab="near" class="on" data-t="tabNear"></button>
+      <button type="button" data-tab="search" data-t="tabSearch"></button>
+      <button type="button" data-tab="new" data-t="tabNew"></button>
+    </div>
+    <div id="nearBox">
+      <div class="loc" style="margin-bottom:10px"><button class="ghost small" type="button" id="nearBtn" data-t="refreshNear"></button><span id="nearState" class="pill wait" hidden></span></div>
+      <div id="nearList"></div>
+    </div>
+    <div id="searchBox" hidden>
+      <input id="q" type="search" data-ph="searchPh" style="margin-bottom:10px">
+      <div id="searchList"></div>
+    </div>
+    <div id="homeMsg"></div>
+  </section>
+
+  <section id="edit" hidden>
+    <button class="ghost small" type="button" id="backBtn" style="margin-bottom:10px" data-t="back"></button>
+    <h1 id="editTitle"></h1>
+    <form id="form" novalidate onsubmit="return false">
+      <div class="card">
+        <h2 data-t="location"></h2>
+        <p class="hint" id="locHint"></p>
+        <div class="loc">
+          <button class="ghost small" type="button" id="locBtn" data-t="useMyLoc"></button>
+          <span id="locState" class="pill wait" hidden></span>
+          <a id="locMap" class="hint" target="_blank" rel="noopener" data-t="checkMap"></a>
+        </div>
+      </div>
+      <div class="card">
+        <h2 data-t="names"></h2>
+        <label for="nOrig" data-t="nameOrig"></label>
+        <input id="nOrig" type="text" maxlength="120" required>
+        <label for="nCkb" data-t="nameCkb"></label>
+        <input id="nCkb" type="text" maxlength="120" dir="rtl">
+        <label for="nAr" data-t="nameAr"></label>
+        <input id="nAr" type="text" maxlength="120" dir="rtl">
+        <label for="nEn" data-t="nameEn"></label>
+        <input id="nEn" type="text" maxlength="120" class="ltr">
+      </div>
+      <div class="card">
+        <h2 data-t="type"></h2>
+        <div class="chips" id="cats"></div>
+      </div>
+      <div class="card">
+        <h2 data-t="photos"></h2>
+        <div class="have" id="have"></div>
+        <p class="hint" data-t="photoHint"></p>
+        <div class="photos">
+          <div class="slot"><span data-t="pFront"></span><input type="file" accept="image/*" capture="environment" data-slot="front"></div>
+          <div class="slot"><span data-t="pInside"></span><input type="file" accept="image/*" capture="environment" data-slot="inside"></div>
+          <div class="slot"><span data-t="pTable"></span><input type="file" accept="image/*" capture="environment" data-slot="table"></div>
+          <div class="slot"><span data-t="pMenu"></span><input type="file" accept="image/*" data-slot="menu"></div>
+          <div class="slot"><span data-t="pMore"></span><input type="file" accept="image/*" data-slot="other"></div>
+          <div class="slot" id="logoSlot"><span data-t="pLogo"></span><input type="file" accept="image/*" data-slot="logo"></div>
+        </div>
+        <label class="check" style="margin-top:14px"><input type="checkbox" id="consent"><span data-t="consent"></span></label>
+      </div>
+      <div class="card">
+        <h2 data-t="details"></h2>
+        <label for="phone" data-t="phone"></label>
+        <input id="phone" type="tel" class="ltr" maxlength="30" placeholder="0770 123 4567">
+        <label for="ig">Instagram</label>
+        <input id="ig" type="text" class="ltr" maxlength="80" placeholder="@name">
+        <label for="hours" data-t="hours"></label>
+        <input id="hours" type="text" maxlength="120" data-ph="hoursPh">
+      </div>
+      <div id="formMsg"></div>
+    </form>
+  </section>
+</main>
+
+<div class="bar" id="bar" hidden><div style="flex-direction:column">
+  <button class="primary" id="saveBtn" type="button" data-t="save"></button>
+  <div class="progress" id="prog" hidden><i></i></div>
+</div></div>
+
+<script src="supabase.js"></script><!-- @supabase/supabase-js 2.45.4, bundled -->
+<script>
+const SUPABASE_URL = "https://rbkqimfaxgcoajugvxeb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_zFRS1IrsmuG66Rh2HLIfeQ_e-phczF6";
+const CATS = [["cafe","کافێ","Café"],["restaurant","چێشتخانە","Restaurant"],["fast_food","خواردنی خێرا","Fast food"],["bar","بار","Bar"],["lounge","لاونج","Lounge"],["hotel","هوتێل","Hotel"],["dessert","شیرینی","Desserts"],["bakery","نانەواخانە","Bakery"],["other","تر","Other"]];
+const TXT = {
+  logout:["چوونەدەرەوە","Log out"], loginTitle:["چوونەژوورەوەی ڕووپێوکار","Surveyor sign in"], email:["ئیمەیڵ","Email"], password:["وشەی نهێنی","Password"], signIn:["چوونەژوورەوە","Sign in"],
+  todayChanges:["گۆڕانکاری ئەمڕۆ","Changes today"], tabNear:["نزیک","Nearby"], tabSearch:["گەڕان","Search"], tabNew:["+ شوێنی نوێ","+ New place"],
+  refreshNear:["نوێکردنەوە","Refresh"], searchPh:["ناوی شوێنێک بنووسە…","Type a place name…"], noneNear:["لەم نزیکانە هیچ شوێنێک نییە. شوێنی نوێ زیاد بکە.","No places near you. Add a new one."], noneFound:["هیچ نەدۆزرایەوە.","Nothing found."],
+  photosN:["{n} وێنە","{n} photos"], back:["گەڕانەوە","Back"], newTitle:["شوێنی نوێ","New place"],
+  location:["شوێن","Location"], locHintNew:["لە بەردەم دەرگای شوێنەکە ڕاوەستە و دوگمەکە دابگرە.","Stand at the entrance and tap the button."], locHintEdit:["ئەگەر شوێنەکە لەسەر نەخشە هەڵەیە، لە بەردەم دەرگاکە ڕاوەستە و دوگمەکە دابگرە.","If the map pin is wrong, stand at the entrance and tap the button."],
+  useMyLoc:["شوێنی ئێستام","Use my location"], checkMap:["بینین لەسەر نەخشە","Check on map"],
+  names:["ناو","Name"], nameOrig:["ناو وەک لەسەر تابلۆکە نووسراوە *","Name exactly as on the sign *"], nameCkb:["ناو بە کوردی","Name in Kurdish"], nameAr:["ناو بە عەرەبی","Name in Arabic"], nameEn:["ناو بە ئینگلیزی","Name in English"],
+  type:["جۆر *","Type *"], photos:["لۆگۆ و وێنەکان","Logo & photos"], photoHint:["ڕووناکی ڕۆژ، ئاسۆیی، تابلۆکە ڕوون بێت. ڕووخساری میوانەکان مەگرە.","Daylight, landscape, sign readable. No customers' faces."],
+  pFront:["بەردەم و تابلۆ","Front & sign"], pInside:["ناوەوە","Inside"], pTable:["مێز","Table"], pMenu:["مینیو","Menu"], pMore:["زیاتر","More"], pLogo:["لۆگۆ","Logo"],
+  consent:["خاوەن یان بەڕێوەبەری شوێنەکە ڕازی بوو بە بەکارهێنانی ئەم وێنانە لە ڤایب چێک","The owner or manager agreed that VibeCheck can use these photos"],
+  details:["زانیاری زیاتر","More details"], phone:["ژمارەی تەلەفۆن","Phone number"], hours:["کاتەکانی کارکردن","Opening hours"], hoursPh:["هەموو ڕۆژێک 10:00–24:00","Every day 10:00–24:00"],
+  save:["پاشەکەوتکردن","Save"], locating:["چاوەڕێ بە… شوێن دەدۆزرێتەوە","Finding location…"], accuracy:["وردی: {m} م","Accuracy: {m} m"], locDenied:["ڕێگەی شوێن نەدراوە. لە ڕێکخستنەکانی وێبگەڕەکەت ڕێگە بدە.","Location permission denied. Allow it in your browser settings."],
+  needLoc:["سەرەتا شوێن وەربگرە (وردی باشتر لە 50 م).","Get the location first (better than 50 m)."], needName:["ناوی سەر تابلۆکە بنووسە.","Enter the name on the sign."], needCat:["جۆری شوێنەکە هەڵبژێرە.","Choose the type of place."],
+  needConsent:["بۆ ناردنی وێنە ڕەزامەندی خاوەنەکە پێویستە.","The owner's agreement is needed to send photos."], sending:["پاشەکەوت دەکرێت…","Saving…"], saved:["پاشەکەوتکرا. سوپاس!","Saved. Thank you!"],
+  failed:["پاشەکەوت سەرکەوتوو نەبوو. هێڵی ئینتەرنێت بپشکنە و دووبارە هەوڵ بدەرەوە. هیچ شتێک نەسڕاوەتەوە.","Saving failed. Check the connection and try again. Nothing was lost."],
+  badLogin:["ئیمەیڵ یان وشەی نهێنی هەڵەیە.","Wrong email or password."], notSurveyor:["ئەم هەژمارە ڕێگەی ڕووپێوی نییە. پەیوەندی بە هەناسە بکە.","This account is not a surveyor. Contact Hanasa."],
+  mOff:["{d}","{d}"]
+};
+let lang = "ckb"; try { lang = localStorage.getItem("vcs_lang") || "ckb"; } catch {}
+const L = () => lang === "ckb" ? 0 : 1;
+const t = (k, a = {}) => (TXT[k] ? TXT[k][L()] : k).replace(/\{(\w+)\}/g, (_, x) => a[x] ?? "");
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+let sb = null;
+try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { document.body.insertAdjacentHTML("afterbegin", '<div class="msg err">Could not load. Check the internet connection and reload.</div>'); }
+const publicUrl = path => sb.storage.from("venues").getPublicUrl(path).data.publicUrl;
+
+// ---------- state ----------
+let view = "home", tab = "near";
+let me = null, here = null;           // here = {lat,lng,accuracy}
+let nearList = [], searchList = [], photoCounts = {};
+let cur = null;                        // venue being edited (null = new)
+let cat = null, pos = null, watchId = null;
+const files = {};
+
+function applyLang() {
+  document.documentElement.lang = lang === "ckb" ? "ckb" : "en";
+  document.documentElement.dir = lang === "ckb" ? "rtl" : "ltr";
+  document.body.classList.toggle("en", lang !== "ckb");
+  $("#langBtn").textContent = lang === "ckb" ? "English" : "کوردی";
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  document.querySelectorAll("[data-ph]").forEach(el => el.placeholder = t(el.dataset.ph));
+  render();
+}
+$("#langBtn").onclick = () => { lang = lang === "ckb" ? "en" : "ckb"; try { localStorage.setItem("vcs_lang", lang); } catch {} applyLang(); };
+
+function show(v) {
+  view = v;
+  $("#login").hidden = v !== "login"; $("#home").hidden = v !== "home"; $("#edit").hidden = v !== "edit";
+  $("#bar").hidden = v !== "edit"; $("#outBtn").hidden = v === "login";
+  window.scrollTo(0, 0);
+}
+function showMsg(sel, text, kind) { const el = $(sel); el.innerHTML = ""; if (!text) return; const d = document.createElement("div"); d.className = "msg " + kind; d.textContent = text; el.appendChild(d); }
+
+function dist(a, b) {
+  const r = 6371000, p1 = a.lat * Math.PI / 180, p2 = b.lat * Math.PI / 180, dp = p2 - p1, dl = (b.lng - a.lng) * Math.PI / 180;
+  const h = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return 2 * r * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+const fmtD = m => m < 1000 ? `${Math.round(m / 10) * 10} ${lang === "ckb" ? "م" : "m"}` : `${(m / 1000).toFixed(1)} ${lang === "ckb" ? "کم" : "km"}`;
+const catLabel = c => (CATS.find(x => x[0] === c) || [, "", ""])[lang === "ckb" ? 1 : 2];
+
+// ---------- tabs & lists ----------
+document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => {
+  if (b.dataset.tab === "new") return openEdit(null);
+  tab = b.dataset.tab; render();
+  if (tab === "search") $("#q").focus();
+});
+function render() {
+  document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  $("#nearBox").hidden = tab !== "near"; $("#searchBox").hidden = tab !== "search";
+  renderList("#nearList", nearList, here ? t("noneNear") : "");
+  renderList("#searchList", searchList, $("#q").value.trim().length >= 2 ? t("noneFound") : "");
+  const st = $("#nearState");
+  if (watchId !== null && !here) { st.hidden = false; st.className = "pill wait"; st.textContent = t("locating"); }
+  else if (here) { st.hidden = false; st.className = "pill " + (here.accuracy <= 30 ? "good" : "wait"); st.textContent = t("accuracy", { m: Math.round(here.accuracy) }); }
+  else st.hidden = true;
+  renderEditLoc(); renderCats();
+}
+function renderList(sel, list, emptyText) {
+  const box = $(sel); box.innerHTML = "";
+  if (!list.length) { if (emptyText) box.innerHTML = `<p class="hint">${esc(emptyText)}</p>`; return; }
+  for (const v of list) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "vrow";
+    const alt = [v.name_en, v.name_ckb, v.name_ar].filter(x => x && x !== v.name)[0];
+    const d = here ? " · " + fmtD(dist(here, v)) : "";
+    const logo = v.logo_path ? `<img alt="" src="${esc(publicUrl(v.logo_path))}">` : esc((v.name || "?").slice(0, 2).toUpperCase());
+    b.innerHTML = `<span class="logo">${logo}</span><span class="grow"><b>${esc(v.name)}</b>${alt ? `<small>${esc(alt)}</small><br>` : ""}<small>${esc(catLabel(v.category))}${d} · ${esc(t("photosN", { n: photoCounts[v.id] || 0 }))}</small></span>`;
+    b.onclick = () => openEdit(v);
+    box.appendChild(b);
+  }
+}
+const COLS = "id,name,name_ckb,name_ar,name_en,category,lat,lng,phone,instagram,opening_hours,logo_path";
+async function loadCounts(list) {
+  const ids = list.map(v => v.id).filter(id => !(id in photoCounts));
+  if (!ids.length) return;
+  const { data } = await sb.from("venue_photos").select("venue_id").in("venue_id", ids);
+  ids.forEach(id => photoCounts[id] = 0);
+  (data || []).forEach(r => photoCounts[r.venue_id] = (photoCounts[r.venue_id] || 0) + 1);
+  render();
+}
+async function loadNear() {
+  if (!here) return;
+  const dLat = 0.0045, dLng = 0.0055; // about 500 m
+  const { data, error } = await sb.from("venues").select(COLS).eq("hidden", false)
+    .gte("lat", here.lat - dLat).lte("lat", here.lat + dLat).gte("lng", here.lng - dLng).lte("lng", here.lng + dLng).limit(200);
+  if (error) return showMsg("#homeMsg", t("failed"), "err");
+  nearList = (data || []).sort((a, b) => dist(here, a) - dist(here, b)).slice(0, 40);
+  render(); loadCounts(nearList);
+}
+function locate(cb) {
+  if (!navigator.geolocation) return showMsg(view === "edit" ? "#formMsg" : "#homeMsg", t("locDenied"), "err");
+  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+  let best = null;
+  watchId = navigator.geolocation.watchPosition(p => {
+    const c = p.coords;
+    if (!best || c.accuracy <= best.accuracy) best = { lat: c.latitude, lng: c.longitude, accuracy: c.accuracy };
+    cb(best, false);
+    if (best.accuracy <= 15) { navigator.geolocation.clearWatch(watchId); watchId = null; cb(best, true); }
+  }, () => { watchId = null; render(); showMsg(view === "edit" ? "#formMsg" : "#homeMsg", t("locDenied"), "err"); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 });
+  render();
+}
+$("#nearBtn").onclick = () => locate((p, final) => { const first = !here; here = p; render(); if (first || final) loadNear(); });
+let qTimer = null;
+$("#q").oninput = () => {
+  clearTimeout(qTimer);
+  qTimer = setTimeout(async () => {
+    const q = $("#q").value.trim().replace(/[%,()]/g, " ");
+    if (q.length < 2) { searchList = []; return render(); }
+    const like = `%${q}%`;
+    const { data } = await sb.from("venues").select(COLS).eq("hidden", false)
+      .or(`name.ilike.${like},name_en.ilike.${like},name_ckb.ilike.${like},name_ar.ilike.${like}`).limit(40);
+    searchList = data || []; if (here) searchList.sort((a, b) => dist(here, a) - dist(here, b));
+    render(); loadCounts(searchList);
+  }, 300);
+};
+
+// ---------- edit / new ----------
+async function openEdit(v) {
+  cur = v; cat = v ? v.category : null; pos = null;
+  for (const k in files) delete files[k];
+  document.querySelectorAll(".slot img").forEach(i => i.remove());
+  $("#form").reset(); showMsg("#formMsg", "");
+  $("#editTitle").textContent = v ? v.name : t("newTitle");
+  $("#nOrig").value = v?.name || ""; $("#nCkb").value = v?.name_ckb || ""; $("#nAr").value = v?.name_ar || ""; $("#nEn").value = v?.name_en || "";
+  $("#phone").value = v?.phone || ""; $("#ig").value = v?.instagram || ""; $("#hours").value = v?.opening_hours || "";
+  const have = $("#have"); have.innerHTML = "";
+  if (v) {
+    if (v.logo_path) have.insertAdjacentHTML("beforeend", `<img alt="" src="${esc(publicUrl(v.logo_path))}">`);
+    const { data } = await sb.from("venue_photos").select("path").eq("venue_id", v.id).order("created_at", { ascending: false }).limit(20);
+    (data || []).forEach(p => have.insertAdjacentHTML("beforeend", `<img alt="" src="${esc(publicUrl(p.path))}">`));
+  }
+  show("edit"); render();
+  if (!v && here && here.accuracy <= 30) pos = here;
+  renderEditLoc();
+}
+$("#backBtn").onclick = () => { show("home"); render(); };
+function renderEditLoc() {
+  if (view !== "edit") return;
+  $("#locHint").textContent = cur ? t("locHintEdit") : t("locHintNew");
+  const st = $("#locState"), map = $("#locMap");
+  const p = pos || (cur ? { lat: cur.lat, lng: cur.lng } : null);
+  map.hidden = !p; if (p) map.href = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`;
+  if (pos) { st.hidden = false; st.className = "pill " + (pos.accuracy <= 25 ? "good" : pos.accuracy <= 50 ? "wait" : "bad"); st.textContent = t("accuracy", { m: Math.round(pos.accuracy) }); }
+  else if (watchId !== null) { st.hidden = false; st.className = "pill wait"; st.textContent = t("locating"); }
+  else st.hidden = true;
+}
+$("#locBtn").onclick = () => locate(p => { pos = p; here = here || p; renderEditLoc(); });
+function renderCats() {
+  const box = $("#cats"); box.innerHTML = "";
+  for (const [k] of CATS) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip" + (cat === k ? " on" : ""); b.textContent = catLabel(k); b.setAttribute("aria-pressed", cat === k);
+    b.onclick = () => { cat = k; renderCats(); };
+    box.appendChild(b);
+  }
+}
+document.querySelectorAll(".slot input").forEach(inp => {
+  inp.onchange = () => {
+    const f = inp.files && inp.files[0]; if (!f) return;
+    files[inp.dataset.slot] = f;
+    const slot = inp.parentElement; slot.querySelector("img")?.remove();
+    const img = document.createElement("img"); img.alt = ""; img.src = URL.createObjectURL(f); slot.insertBefore(img, inp);
+  };
+});
+
+async function shrink(file, max = 1600, type = "image/jpeg", q = 0.82) {
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas"); c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return await new Promise(r => c.toBlob(b => r(b || file), type, q));
+  } catch { return file; }
+}
+
+let saving = false;
+$("#saveBtn").onclick = async () => {
+  if (saving) return;
+  showMsg("#formMsg", "");
+  const name = $("#nOrig").value.trim();
+  const photoSlots = ["front", "inside", "table", "menu", "other"].filter(k => files[k]);
+  if (!cur && (!pos || pos.accuracy > 50)) return fail("needLoc");
+  if (pos && pos.accuracy > 50) return fail("needLoc");
+  if (!name) return fail("needName");
+  if (!cat) return fail("needCat");
+  if ((photoSlots.length || files.logo) && !$("#consent").checked) return fail("needConsent");
+  saving = true; $("#saveBtn").disabled = true; $("#saveBtn").textContent = t("sending");
+  const prog = $("#prog"); prog.hidden = false; const bar = prog.querySelector("i");
+  try {
+    const v = id => $(id).value.trim() || null;
+    const fields = { name, name_ckb: v("#nCkb"), name_ar: v("#nAr"), name_en: v("#nEn"), category: cat, phone: v("#phone"), instagram: v("#ig"), opening_hours: v("#hours") };
+    if (pos) { fields.lat = pos.lat; fields.lng = pos.lng; }
+    let venue;
+    if (cur) {
+      const { data, error } = await sb.from("venues").update(fields).eq("id", cur.id).select(COLS).single();
+      if (error) throw error; venue = data;
+    } else {
+      const { data, error } = await sb.from("venues").insert({ ...fields, source: "own", added_by: me.id, status: "approved" }).select(COLS).single();
+      if (error) throw error; venue = data;
+    }
+    const total = photoSlots.length + (files.logo ? 1 : 0) + 1; let done = 1;
+    bar.style.width = `${Math.round(done / total * 100)}%`;
+    const stamp = Date.now();
+    if (files.logo) {
+      const isPng = files.logo.type === "image/png";
+      const blob = await shrink(files.logo, 800, isPng ? "image/png" : "image/jpeg");
+      const path = `${venue.id}/logo-${stamp}.${blob.type === "image/png" ? "png" : "jpg"}`;
+      const up = await sb.storage.from("venues").upload(path, blob, { contentType: blob.type });
+      if (up.error) throw up.error;
+      const { data, error } = await sb.from("venues").update({ logo_path: path }).eq("id", venue.id).select(COLS).single();
+      if (error) throw error; venue = data;
+      bar.style.width = `${Math.round(++done / total * 100)}%`;
+    }
+    for (const k of photoSlots) {
+      const blob = await shrink(files[k]);
+      const path = `${venue.id}/${stamp}-${k}.jpg`;
+      const up = await sb.storage.from("venues").upload(path, blob, { contentType: blob.type });
+      if (up.error) throw up.error;
+      const { error } = await sb.from("venue_photos").insert({ venue_id: venue.id, path, kind: k, owner_consent: true, added_by: me.id });
+      if (error) throw error;
+      photoCounts[venue.id] = (photoCounts[venue.id] || 0) + 1;
+      bar.style.width = `${Math.round(++done / total * 100)}%`;
+    }
+    [nearList, searchList].forEach(list => { const i = list.findIndex(x => x.id === venue.id); if (i >= 0) list[i] = venue; else if (list === nearList && !cur) list.unshift(venue); });
+    loadToday();
+    show("home"); render(); showMsg("#homeMsg", t("saved"), "ok");
+  } catch (e) {
+    console.error(e);
+    showMsg("#formMsg", /row-level security|admin_only/.test(String(e?.message)) ? t("notSurveyor") : t("failed"), "err");
+  } finally {
+    saving = false; $("#saveBtn").disabled = false; $("#saveBtn").textContent = t("save"); setTimeout(() => { prog.hidden = true; bar.style.width = "0"; }, 600);
+  }
+};
+function fail(k) { showMsg("#formMsg", t(k), "err"); $("#formMsg").scrollIntoView({ behavior: "smooth", block: "center" }); }
+
+// ---------- auth ----------
+async function loadToday() {
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const { count } = await sb.from("venue_edits").select("id", { count: "exact", head: true }).eq("editor_id", me.id).gte("created_at", start.toISOString());
+  $("#todayCount").textContent = count || 0;
+}
+async function refreshAuth() {
+  if (!sb) return;
+  const { data } = await sb.auth.getSession();
+  me = data.session?.user || null;
+  if (!me) return show("login");
+  $("#who").textContent = me.email;
+  if (view === "login") show("home");
+  render(); loadToday();
+  if (!here) $("#nearBtn").click();
+}
+$("#loginForm").onsubmit = async e => {
+  e.preventDefault(); showMsg("#loginMsg", "");
+  const { error } = await sb.auth.signInWithPassword({ email: $("#email").value.trim(), password: $("#pass").value });
+  if (error) return showMsg("#loginMsg", t("badLogin"), "err");
+  view = "login"; refreshAuth();
+};
+$("#outBtn").onclick = async () => { await sb.auth.signOut(); me = null; show("login"); };
+
+view = "login";
+applyLang();
+if (sb) refreshAuth(); else show("login");
+</script>
+</body>
+</html>
