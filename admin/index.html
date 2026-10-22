@@ -141,6 +141,11 @@ button:disabled{opacity:.5}
 
     <div id="settingsBox" hidden>
       <div class="card">
+        <h2 data-t="signinTitle"></h2>
+        <p class="hint" data-t="signinHint"></p>
+        <label style="display:flex;gap:10px;align-items:center;font-weight:700"><input type="checkbox" id="accOnline" style="width:22px;height:22px;accent-color:var(--coral)"> <span data-t="signinOn"></span></label>
+      </div>
+      <div class="card">
         <h2 data-t="launchTitle"></h2>
         <p class="hint" data-t="launchHint"></p>
         <input id="launchDate" type="date" class="ltr">
@@ -189,6 +194,9 @@ const TXT = {
   surveyor: ["ڕووپێوکار", "Surveyor"], admin: ["بەڕێوەبەر", "Admin"], off: ["ناچالاک", "Switched off"], switchOff: ["ناچالاککردن", "Switch off"], switchOn: ["چالاککردنەوە", "Switch on"],
   addMember: ["زیادکردنی ئەندام", "Add a team member"], addMemberHint: ["سەرەتا لە Supabase → Authentication → Users بەکارهێنەرێک دروست بکە (ئیمەیڵ + وشەی نهێنی)، پاشان ئیمەیڵەکەی لێرە بنووسە.", "First create the login in Supabase → Authentication → Users (email + password), then enter that email here."],
   name: ["ناو", "Name"], role: ["ڕۆڵ", "Role"], add: ["زیادکردن", "Add"], addedOk: ["زیادکرا.", "Added."], noLogin: ["ئەم ئیمەیڵە لە Supabase نییە. سەرەتا لە Authentication → Users دروستی بکە.", "No login with this email. Create it first in Supabase → Authentication → Users."],
+  signinTitle: ["چوونەژوورەوەی ڕاستەقینە لە ئەپ", "Real sign-in in the app"],
+  signinHint: ["کاتێک چالاکە، ئەپەکە کۆد دەنێرێت (واتسئاپ) و هەژمارەکان لەسەر سێرڤەر پاشەکەوت دەکات. پێش چالاککردن، Phone و Send SMS hook لە Supabase ڕێکبخە (docs/setup-accounts.md).", "When on, the app sends sign-in codes (WhatsApp) and saves accounts on the server. Set up Phone sign-in and the Send SMS hook in Supabase first (docs/setup-accounts.md)."],
+  signinOn: ["چالاکە", "Switched on"],
   launchTitle: ["ڕۆژی بڵاوکردنەوە", "Launch day"], launchHint: ["ڕۆژی بڵاوکردنەوەی ئەپەکە. Plus بۆ هەمووان بەخۆڕاییە تا 90 ڕۆژ دوای ئەم ڕۆژە.", "The day the app goes public. Plus is free for everyone for 90 days after it."],
   freeUntil: ["Plus بەخۆڕاییە تا {d}", "Plus is free until {d}"], notLaunched: ["هێشتا دیاری نەکراوە — Plus بۆ هەمووان بەخۆڕاییە.", "Not set yet — Plus is free for everyone."],
   giftsTitle: ["دیاری Plus لە مانگێکدا", "Plus gifts per month"], golden: ["گۆڵدن VIP", "Golden VIP"], diamond: ["دایمەند VIP", "Diamond VIP"],
@@ -437,10 +445,17 @@ $("#addBtn").onclick = async () => {
 };
 
 // ---------- settings ----------
+$("#accOnline").onchange = async e => {
+  const on = e.target.checked;
+  const { error } = await sb.from("app_settings").upsert({ key: "accounts_online", value: on, updated_at: new Date().toISOString() });
+  if (error) { e.target.checked = !on; return showMsg(t("failed"), "err"); }
+  showMsg(t("saved"));
+};
 async function loadSettings() {
   const { data, error } = await sb.from("app_settings").select("key,value");
   if (error) { $("#setupMsg").innerHTML = `<div class="msg err">${esc(t("needSql"))}</div>`; return; }
   const s = Object.fromEntries((data || []).map(r => [r.key, r.value]));
+  $("#accOnline").checked = s.accounts_online === true;
   $("#launchDate").value = s.launch_date || "";
   $("#gGold").value = s.gifts_per_month?.golden ?? 1; $("#gDia").value = s.gifts_per_month?.diamond ?? 3;
   showFreeEnd(s.free_plus_days ?? 90);
