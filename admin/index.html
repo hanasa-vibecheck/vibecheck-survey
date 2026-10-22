@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>VibeCheck Admin</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800&family=DM+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--coral:#E2573B;--ink:#1E1630;--bg:#F6F3F8;--card:#fff;--line:#E0D8E8;--muted:#6C6280;--ok:#1F8A5B;--err:#C0392B;--warn:#9a6a0e}
+@media (prefers-color-scheme:dark){:root{--ink:#F2ECFA;--bg:#130E1E;--card:#1D1630;--line:#33294A;--muted:#A79BBD;--coral:#FF7A5C;--warn:#E3B04B}}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Arabic","DM Sans",system-ui,sans-serif;font-size:16px;line-height:1.5}
+body.en{font-family:"DM Sans","Noto Sans Arabic",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.brand{font-family:"DM Sans",sans-serif;font-weight:800;font-size:20px;direction:ltr;display:flex;align-items:center;gap:6px}
+.brand b{color:var(--coral)}
+.sv{font-weight:600;color:var(--muted);font-size:15px}
+.grow{flex:1;min-width:0}
+@media (max-width:420px){.sv{display:none}header .small{padding:6px 10px;font-size:13px;min-height:38px}}
+main{max-width:760px;margin:0 auto;padding:16px 16px 80px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+h1{font-size:22px;margin:4px 0 12px}
+h2{font-size:16px;margin:0 0 10px}
+label{display:block;font-weight:600;margin:10px 0 6px}
+.hint{color:var(--muted);font-size:13.5px;margin:2px 0 8px}
+input[type=text],input[type=email],input[type=password],input[type=search],input[type=date],select{width:100%;font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--coral);border-color:transparent}
+.ltr{direction:ltr;text-align:left}
+button{font:inherit;font-weight:800;border:0;border-radius:14px;padding:14px 16px;min-height:48px;cursor:pointer}
+.primary{background:var(--coral);color:#fff}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.danger{background:transparent;color:var(--err);border:1px solid #C0392B55}
+.small{padding:7px 12px;min-height:38px;font-size:14px;border-radius:12px}
+button:disabled{opacity:.5}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:14px}
+.tabs button{background:transparent;color:var(--ink);padding:10px 2px;min-height:44px;font-size:13.5px;position:relative}
+.tabs button.on{background:var(--coral);color:#fff}
+.tabs .n{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--err);color:#fff;font-size:11px;line-height:18px;margin-inline-start:4px}
+.row{display:flex;gap:12px;align-items:flex-start}
+.logo{width:46px;height:46px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;background:var(--muted);overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:cover}
+.who{color:var(--muted);font-size:13.5px}
+.diff{margin:8px 0 0;padding:0;list-style:none;font-size:14px}
+.diff li{padding:3px 0;border-top:1px dashed var(--line)}
+.diff .k{color:var(--muted);font-weight:600}
+.diff del{color:var(--err);text-decoration:line-through;opacity:.8}
+.diff ins{color:var(--ok);text-decoration:none;font-weight:600}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12.5px;font-weight:700}
+.pill.ok{background:#1F8A5B22;color:var(--ok)}.pill.bad{background:#C0392B22;color:var(--err)}.pill.wait{background:#C98A1422;color:var(--warn)}.pill.mut{background:#6C628022;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.ph{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.ph img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--line);cursor:zoom-in}
+.ph .t{padding:8px 10px;font-size:13px}
+.ph .t b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph.hid img{opacity:.35}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:700;min-height:0;font-size:13.5px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.msg{padding:12px 14px;border-radius:12px;margin:10px 0;font-weight:600}
+.msg.err{background:#C0392B1a;color:var(--err)}.msg.ok{background:#1F8A5B1a;color:var(--ok)}
+.stat{font-size:24px;font-weight:800;line-height:1.2}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.stats div{background:var(--bg);border-radius:12px;padding:8px 10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.viewer{position:fixed;inset:0;background:#000d;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+.viewer img{max-width:100%;max-height:100%;border-radius:8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 100 100" aria-hidden="true"><path d="M20 50 40 70 66 37" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><circle cx="78" cy="23" r="10" fill="#E2573B"/></svg><span>Vibe<b>Check</b></span> <span class="sv">Admin</span></div>
+  <div class="grow"></div>
+  <button class="ghost small" id="langBtn" type="button">English</button>
+  <button class="ghost small" id="outBtn" type="button" hidden data-t="logout"></button>
+</header>
+
+<main>
+  <section id="login" hidden>
+    <h1 data-t="loginTitle"></h1>
+    <div class="card">
+      <form id="loginForm">
+        <label for="email" data-t="email"></label>
+        <input id="email" type="email" class="ltr" autocomplete="username" required>
+        <label for="pass" data-t="password"></label>
+        <input id="pass" type="password" class="ltr" autocomplete="current-password" required>
+        <div id="loginMsg"></div>
+        <button class="primary" type="submit" style="margin-top:14px;width:100%" data-t="signIn"></button>
+      </form>
+    </div>
+  </section>
+
+  <section id="app" hidden>
+    <div id="setupMsg"></div>
+    <div class="tabs" role="tablist">
+      <button type="button" data-tab="changes" class="on"><span data-t="tabChanges"></span></button>
+      <button type="button" data-tab="photos"><span data-t="tabPhotos"></span></button>
+      <button type="button" data-tab="places"><span data-t="tabPlaces"></span><span class="n" id="pendN" hidden></span></button>
+      <button type="button" data-tab="team"><span data-t="tabTeam"></span></button>
+      <button type="button" data-tab="settings"><span data-t="tabSettings"></span></button>
+    </div>
+    <div id="msg"></div>
+
+    <div id="changesBox">
+      <div class="chips" id="whoF"></div>
+      <div id="changesList"></div>
+      <button class="ghost" type="button" id="moreChanges" style="width:100%" data-t="showMore" hidden></button>
+    </div>
+
+    <div id="photosBox" hidden>
+      <div class="chips" id="photoF"></div>
+      <div class="grid" id="photosList"></div>
+      <button class="ghost" type="button" id="morePhotos" style="width:100%;margin-top:10px" data-t="showMore" hidden></button>
+    </div>
+
+    <div id="placesBox" hidden>
+      <div class="chips" id="placeF"></div>
+      <input id="q" type="search" data-ph="searchPh" style="margin-bottom:10px">
+      <div id="placesList"></div>
+    </div>
+
+    <div id="teamBox" hidden>
+      <div id="teamList"></div>
+      <div class="card">
+        <h2 data-t="addMember"></h2>
+        <p class="hint" data-t="addMemberHint"></p>
+        <div class="two">
+          <div><label for="mEmail" data-t="email"></label><input id="mEmail" type="email" class="ltr"></div>
+          <div><label for="mName" data-t="name"></label><input id="mName" type="text" maxlength="40"></div>
+        </div>
+        <label for="mRole" data-t="role"></label>
+        <select id="mRole"><option value="surveyor" data-t="surveyor"></option><option value="admin" data-t="admin"></option></select>
+        <button class="primary" type="button" id="addBtn" style="width:100%;margin-top:12px" data-t="add"></button>
+      </div>
+    </div>
+
+    <div id="settingsBox" hidden>
+      <div class="card">
+        <h2 data-t="launchTitle"></h2>
+        <p class="hint" data-t="launchHint"></p>
+        <input id="launchDate" type="date" class="ltr">
+        <p class="hint" id="freeEnd" style="margin-top:8px"></p>
+        <button class="primary" type="button" id="saveLaunch" style="width:100%;margin-top:6px" data-t="save"></button>
+      </div>
+      <div class="card">
+        <h2 data-t="giftsTitle"></h2>
+        <div class="two">
+          <div><label for="gGold" data-t="golden"></label><input id="gGold" type="text" inputmode="numeric" class="ltr"></div>
+          <div><label for="gDia" data-t="diamond"></label><input id="gDia" type="text" inputmode="numeric" class="ltr"></div>
+        </div>
+        <button class="primary" type="button" id="saveGifts" style="width:100%;margin-top:12px" data-t="save"></button>
+      </div>
+      <div class="card">
+        <h2 data-t="linksTitle"></h2>
+        <p><a href="../" data-t="surveyLink"></a></p>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="viewer" id="viewer" hidden><img alt=""></div>
+
+<script src="../supabase.js"></script><!-- @supabase/supabase-js 2.45.4, bundled -->
+<script>
+"use strict";
+const SUPABASE_URL = "https://rbkqimfaxgcoajugvxeb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_zFRS1IrsmuG66Rh2HLIfeQ_e-phczF6";
+const CATS = { cafe: ["کافێ", "Café"], restaurant: ["چێشتخانە", "Restaurant"], fast_food: ["خواردنی خێرا", "Fast food"], bar: ["بار", "Bar"], lounge: ["لاونج", "Lounge"], hotel: ["هوتێل", "Hotel"], dessert: ["شیرینی", "Desserts"], bakery: ["نانەواخانە", "Bakery"], other: ["تر", "Other"] };
+const TXT = {
+  logout: ["چوونەدەرەوە", "Log out"], loginTitle: ["چوونەژوورەوەی بەڕێوەبەر", "Admin sign in"], email: ["ئیمەیڵ", "Email"], password: ["وشەی نهێنی", "Password"], signIn: ["چوونەژوورەوە", "Sign in"],
+  badLogin: ["ئیمەیڵ یان وشەی نهێنی هەڵەیە.", "Wrong email or password."], notAdmin: ["ئەم پەڕەیە تەنها بۆ بەڕێوەبەرە.", "This page is for admins only."],
+  needSql: ["هەندێک بەش کار ناکەن تا فایلی 0003_admin_plans.sql لە Supabase SQL Editor جێبەجێ نەکەیت.", "Some parts need the database update 0003_admin_plans.sql (Supabase → SQL Editor)."],
+  tabChanges: ["گۆڕانکاری", "Changes"], tabPhotos: ["وێنە", "Photos"], tabPlaces: ["شوێن", "Places"], tabTeam: ["تیم", "Team"], tabSettings: ["ڕێکخستن", "Settings"],
+  showMore: ["زیاتر", "Show more"], everyone: ["هەموو", "Everyone"], searchPh: ["ناوی شوێن…", "Place name…"],
+  added: ["شوێنی نوێی زیادکرد", "added a new place"], edited: ["دەستکاری کرد", "edited"], undone: ["گەڕێندرایەوە", "Undone"], undo: ["گەڕاندنەوە", "Undo"],
+  undoAsk: ["دڵنیایت؟ شوێنەکە دەگەڕێتەوە بۆ پێش ئەم گۆڕانکارییە.", "Sure? The place goes back to how it was before this change."],
+  undoAskNew: ["دڵنیایت؟ ئەم شوێنە نوێیە دەشاردرێتەوە.", "Sure? This new place will be hidden."],
+  moved: ["شوێنەکەی گوازرایەوە {m} م", "location moved {m} m"], nothing: ["هیچ نییە.", "Nothing here."],
+  open: ["کردنەوە", "Open"], hide: ["شاردنەوە", "Hide"], show: ["پیشاندان", "Show"], del: ["سڕینەوە", "Delete"], approve: ["پەسەندکردن", "Approve"],
+  delAsk: ["ئەم وێنەیە بە یەکجاری بسڕدرێتەوە؟", "Delete this photo for good?"], hidden: ["شاردراوە", "Hidden"], pending: ["چاوەڕێی پێداچوونەوە", "Waiting for review"],
+  fAll: ["هەموو", "All"], fVisible: ["دیار", "Visible"], fHidden: ["شاردراوە", "Hidden"], fPending: ["چاوەڕێ", "Pending"], fNew: ["نوێی تیم", "Added by team"],
+  photosN: ["{n} وێنە", "{n} photos"], byWho: ["لەلایەن {who}", "by {who}"],
+  editsToday: ["ئەمڕۆ", "Today"], editsTotal: ["کۆی گۆڕانکاری", "All changes"], photosTotal: ["وێنە", "Photos"], lastSeen: ["دوایین کار: {d}", "Last work: {d}"], never: ["هێشتا هیچ", "Nothing yet"],
+  surveyor: ["ڕووپێوکار", "Surveyor"], admin: ["بەڕێوەبەر", "Admin"], off: ["ناچالاک", "Switched off"], switchOff: ["ناچالاککردن", "Switch off"], switchOn: ["چالاککردنەوە", "Switch on"],
+  addMember: ["زیادکردنی ئەندام", "Add a team member"], addMemberHint: ["سەرەتا لە Supabase → Authentication → Users بەکارهێنەرێک دروست بکە (ئیمەیڵ + وشەی نهێنی)، پاشان ئیمەیڵەکەی لێرە بنووسە.", "First create the login in Supabase → Authentication → Users (email + password), then enter that email here."],
+  name: ["ناو", "Name"], role: ["ڕۆڵ", "Role"], add: ["زیادکردن", "Add"], addedOk: ["زیادکرا.", "Added."], noLogin: ["ئەم ئیمەیڵە لە Supabase نییە. سەرەتا لە Authentication → Users دروستی بکە.", "No login with this email. Create it first in Supabase → Authentication → Users."],
+  launchTitle: ["ڕۆژی بڵاوکردنەوە", "Launch day"], launchHint: ["ڕۆژی بڵاوکردنەوەی ئەپەکە. Plus بۆ هەمووان بەخۆڕاییە تا 90 ڕۆژ دوای ئەم ڕۆژە.", "The day the app goes public. Plus is free for everyone for 90 days after it."],
+  freeUntil: ["Plus بەخۆڕاییە تا {d}", "Plus is free until {d}"], notLaunched: ["هێشتا دیاری نەکراوە — Plus بۆ هەمووان بەخۆڕاییە.", "Not set yet — Plus is free for everyone."],
+  giftsTitle: ["دیاری Plus لە مانگێکدا", "Plus gifts per month"], golden: ["گۆڵدن VIP", "Golden VIP"], diamond: ["دایمەند VIP", "Diamond VIP"],
+  save: ["پاشەکەوتکردن", "Save"], saved: ["پاشەکەوتکرا.", "Saved."], failed: ["سەرکەوتوو نەبوو. دووبارە هەوڵ بدەرەوە.", "That didn't work. Please try again."],
+  linksTitle: ["بەستەرەکان", "Links"], surveyLink: ["پەڕەی ڕووپێو", "Survey page"],
+  k_name: ["ناو", "Name"], k_name_ckb: ["ناوی کوردی", "Kurdish name"], k_name_ar: ["ناوی عەرەبی", "Arabic name"], k_name_en: ["ناوی ئینگلیزی", "English name"], k_category: ["جۆر", "Type"],
+  k_phone: ["تەلەفۆن", "Phone"], k_instagram: ["ئینستاگرام", "Instagram"], k_opening_hours: ["کاتەکان", "Hours"], k_logo_path: ["لۆگۆ", "Logo"], k_hidden: ["شاردراوە", "Hidden"], k_status: ["دۆخ", "Status"],
+  k_website: ["ماڵپەڕ", "Website"], k_address: ["ناونیشان", "Address"], empty: ["(بەتاڵ)", "(empty)"], newLogo: ["لۆگۆی نوێ", "new logo"]
+};
+let lang = "ckb"; try { lang = localStorage.getItem("vca_lang") || "ckb"; } catch {}
+const LI = () => lang === "ckb" ? 0 : 1;
+const t = (k, a = {}) => (TXT[k] ? TXT[k][LI()] : k).replace(/\{(\w+)\}/g, (_, x) => a[x] ?? "");
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const catLabel = c => (CATS[c] || CATS.other)[LI()];
+const when = d => new Date(d).toLocaleString(lang === "ckb" ? "ckb-IQ" : "en-GB", { dateStyle: "medium", timeStyle: "short" });
+
+let sb = null;
+try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch { document.body.insertAdjacentHTML("afterbegin", '<div class="msg err">Could not load. Check the internet connection and reload.</div>'); }
+const publicUrl = p => sb.storage.from("venues").getPublicUrl(p).data.publicUrl;
+
+let me = null, tab = "changes", team = [], teamOk = true;
+let edits = [], editsDone = false, whoF = null;
+let photos = [], photosDone = false, photoF = "all";
+let places = [], placeF = "pending";
+const venueCache = {};
+
+function showMsg(text, kind = "ok") { const el = $("#msg"); el.innerHTML = ""; if (!text) return; const d = document.createElement("div"); d.className = "msg " + kind; d.textContent = text; el.appendChild(d); if (kind === "ok") setTimeout(() => { if (el.contains(d)) d.remove(); }, 3000); }
+function show(id) { $("#login").hidden = id !== "login"; $("#app").hidden = id !== "app"; $("#outBtn").hidden = id === "login"; }
+function applyLang() {
+  document.documentElement.lang = lang === "ckb" ? "ckb" : "en";
+  document.documentElement.dir = lang === "ckb" ? "rtl" : "ltr";
+  document.body.classList.toggle("en", lang !== "ckb");
+  $("#langBtn").textContent = lang === "ckb" ? "English" : "کوردی";
+  document.querySelectorAll("[data-t]").forEach(el => el.textContent = t(el.dataset.t));
+  document.querySelectorAll("[data-ph]").forEach(el => el.placeholder = t(el.dataset.ph));
+  if (me) render();
+}
+$("#langBtn").onclick = () => { lang = lang === "ckb" ? "en" : "ckb"; try { localStorage.setItem("vca_lang", lang); } catch {} applyLang(); };
+
+const nameOf = id => { if (!id) return "—"; const m = team.find(x => x.user_id === id); return m ? m.name : (id === me?.id ? me.email : id.slice(0, 6)); };
+async function venues(ids) {
+  const need = [...new Set(ids)].filter(id => id && !(id in venueCache));
+  for (let i = 0; i < need.length; i += 100) {
+    const { data } = await sb.from("venues").select("id,name,category,logo_path,hidden,status,lat,lng").in("id", need.slice(i, i + 100));
+    (data || []).forEach(v => venueCache[v.id] = v);
+  }
+}
+function logoHtml(v) { return v && v.logo_path ? `<img alt="" src="${esc(publicUrl(v.logo_path))}">` : esc((v?.name || "?").slice(0, 2).toUpperCase()); }
+
+// ---------- tabs ----------
+document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { tab = b.dataset.tab; render(); load(); });
+function render() {
+  document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  for (const k of ["changes", "photos", "places", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
+  if (tab === "changes") renderChanges();
+  if (tab === "photos") renderPhotos();
+  if (tab === "places") renderPlaces();
+  if (tab === "team") renderTeam();
+}
+function load() {
+  if (tab === "changes" && !edits.length) loadChanges();
+  if (tab === "photos" && !photos.length) loadPhotos();
+  if (tab === "places") loadPlaces();
+  if (tab === "team") loadTeam();
+  if (tab === "settings") loadSettings();
+}
+function chips(sel, opts, cur, on) {
+  const box = $(sel); box.innerHTML = "";
+  for (const [k, label] of opts) { const b = document.createElement("button"); b.type = "button"; b.className = "chip" + (cur === k ? " on" : ""); b.textContent = label; b.onclick = () => on(k); box.appendChild(b); }
+}
+
+// ---------- changes ----------
+const FIELDS = ["name", "name_ckb", "name_ar", "name_en", "category", "phone", "instagram", "opening_hours", "website", "address", "logo_path", "hidden", "status"];
+function dist(a, b) { const r = 6371000, p1 = a.lat * Math.PI / 180, p2 = b.lat * Math.PI / 180, dp = p2 - p1, dl = (b.lng - a.lng) * Math.PI / 180; const h = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2; return 2 * r * Math.asin(Math.min(1, Math.sqrt(h))); }
+async function loadChanges(more) {
+  let q = sb.from("venue_edits").select("id,venue_id,editor_id,action,before,after,created_at").order("id", { ascending: false }).limit(40);
+  if (more && edits.length) q = q.lt("id", edits[edits.length - 1].id);
+  if (whoF) q = q.eq("editor_id", whoF);
+  const { data, error } = await q;
+  if (error) return showMsg(t("failed"), "err");
+  edits = more ? edits.concat(data) : data; editsDone = data.length < 40;
+  await venues(edits.map(e => e.venue_id));
+  renderChanges();
+}
+$("#moreChanges").onclick = () => loadChanges(true);
+function fmtVal(k, v) {
+  if (v === null || v === undefined || v === "") return t("empty");
+  if (k === "category") return catLabel(v);
+  if (k === "hidden") return v ? "✓" : "✗";
+  if (k === "logo_path") return t("newLogo");
+  return String(v);
+}
+function renderChanges() {
+  chips("#whoF", [[null, t("everyone")], ...team.map(m => [m.user_id, m.name])], whoF, k => { whoF = k; edits = []; loadChanges(); });
+  const box = $("#changesList"); box.innerHTML = "";
+  if (!edits.length) { box.innerHTML = `<p class="hint">${t("nothing")}</p>`; $("#moreChanges").hidden = true; return; }
+  for (const e of edits) {
+    const v = venueCache[e.venue_id], a = e.after || {}, b = e.before || {};
+    const card = document.createElement("div"); card.className = "card";
+    let diff = "";
+    if (e.action === "update") {
+      for (const k of FIELDS) if (JSON.stringify(a[k] ?? null) !== JSON.stringify(b[k] ?? null))
+        diff += `<li><span class="k">${esc(t("k_" + k))}:</span> <del>${esc(fmtVal(k, b[k]))}</del> → <ins>${esc(fmtVal(k, a[k]))}</ins></li>`;
+      if (b.lat != null && (a.lat !== b.lat || a.lng !== b.lng)) diff += `<li>${esc(t("moved", { m: Math.round(dist(b, a)) }))}</li>`;
+    }
+    const undone = edits.some(x => x.id > e.id && x.venue_id === e.venue_id && x.editor_id === me.id && x.action === "update" && JSON.stringify(pick(x.after)) === JSON.stringify(pick(e.before)));
+    card.innerHTML = `<div class="row"><span class="logo">${logoHtml(v || a)}</span><div class="grow">
+      <b>${esc(a.name || v?.name || "#" + e.venue_id)}</b> ${v?.hidden ? `<span class="pill bad">${t("hidden")}</span>` : ""}
+      <div class="who">${esc(nameOf(e.editor_id))} · ${esc(e.action === "insert" ? t("added") : t("edited"))} · ${esc(when(e.created_at))}</div>
+      ${diff ? `<ul class="diff">${diff}</ul>` : ""}
+      <div class="acts">${e.before || e.action === "insert" ? `<button class="ghost small" type="button" data-undo="${e.id}">${t("undo")}</button>` : ""}${undone ? `<span class="pill ok">${t("undone")}</span>` : ""}</div>
+    </div></div>`;
+    box.appendChild(card);
+  }
+  box.querySelectorAll("[data-undo]").forEach(btn => btn.onclick = async () => {
+    const e = edits.find(x => x.id == btn.dataset.undo);
+    if (!confirm(e.action === "insert" ? t("undoAskNew") : t("undoAsk"))) return;
+    btn.disabled = true;
+    const { error } = await sb.rpc("admin_undo_edit", { p_edit: e.id });
+    if (error) { btn.disabled = false; return showMsg(/function|schema cache/.test(error.message) ? t("needSql") : t("failed"), "err"); }
+    delete venueCache[e.venue_id]; edits = []; await loadChanges(); showMsg(t("undone"));
+  });
+  $("#moreChanges").hidden = editsDone;
+}
+const pick = o => o ? Object.fromEntries(FIELDS.concat(["lat", "lng"]).map(k => [k, o[k] ?? null])) : null;
+
+// ---------- photos ----------
+async function loadPhotos(more) {
+  let q = sb.from("venue_photos").select("id,venue_id,path,kind,added_by,hidden,created_at").order("id", { ascending: false }).limit(48);
+  if (more && photos.length) q = q.lt("id", photos[photos.length - 1].id);
+  if (photoF === "hidden") q = q.eq("hidden", true);
+  const { data, error } = await q;
+  if (error) return showMsg(t("failed"), "err");
+  photos = more ? photos.concat(data) : data; photosDone = data.length < 48;
+  await venues(photos.map(p => p.venue_id));
+  renderPhotos();
+}
+$("#morePhotos").onclick = () => loadPhotos(true);
+function renderPhotos() {
+  chips("#photoF", [["all", t("fAll")], ["hidden", t("fHidden")]], photoF, k => { photoF = k; photos = []; loadPhotos(); });
+  const box = $("#photosList"); box.innerHTML = "";
+  if (!photos.length) { box.innerHTML = `<p class="hint">${t("nothing")}</p>`; $("#morePhotos").hidden = true; return; }
+  for (const p of photos) {
+    const v = venueCache[p.venue_id];
+    const d = document.createElement("div"); d.className = "ph" + (p.hidden ? " hid" : "");
+    d.innerHTML = `<img alt="" loading="lazy" src="${esc(publicUrl(p.path))}"><div class="t"><b>${esc(v?.name || "#" + p.venue_id)}</b><span class="who">${esc(nameOf(p.added_by))} · ${esc(when(p.created_at))}</span>
+      <div class="acts"><button class="ghost small" type="button" data-hide>${p.hidden ? t("show") : t("hide")}</button><button class="danger small" type="button" data-del>${t("del")}</button></div></div>`;
+    d.querySelector("img").onclick = () => { $("#viewer img").src = publicUrl(p.path); $("#viewer").hidden = false; };
+    d.querySelector("[data-hide]").onclick = async ev => {
+      ev.target.disabled = true;
+      const { error } = await sb.from("venue_photos").update({ hidden: !p.hidden }).eq("id", p.id);
+      if (error) { ev.target.disabled = false; return showMsg(t("failed"), "err"); }
+      p.hidden = !p.hidden; renderPhotos();
+    };
+    d.querySelector("[data-del]").onclick = async ev => {
+      if (!confirm(t("delAsk"))) return;
+      ev.target.disabled = true;
+      const { error } = await sb.from("venue_photos").delete().eq("id", p.id);
+      if (error) { ev.target.disabled = false; return showMsg(t("failed"), "err"); }
+      await sb.storage.from("venues").remove([p.path]);
+      photos = photos.filter(x => x.id !== p.id); renderPhotos(); showMsg(t("saved"));
+    };
+    box.appendChild(d);
+  }
+  $("#morePhotos").hidden = photosDone;
+}
+$("#viewer").onclick = () => { $("#viewer").hidden = true; };
+
+// ---------- places ----------
+let qTimer = null;
+$("#q").oninput = () => { clearTimeout(qTimer); qTimer = setTimeout(loadPlaces, 300); };
+async function loadPlaces() {
+  let q = sb.from("venues").select("id,name,name_en,category,logo_path,hidden,status,source,added_by,created_at,updated_at").order("updated_at", { ascending: false }).limit(60);
+  const s = $("#q").value.trim().replace(/[%,()]/g, " ");
+  if (s.length >= 2) q = q.or(`name.ilike.%${s}%,name_en.ilike.%${s}%,name_ckb.ilike.%${s}%,name_ar.ilike.%${s}%`);
+  if (placeF === "pending") q = q.eq("status", "pending").eq("hidden", false);
+  if (placeF === "hidden") q = q.eq("hidden", true);
+  if (placeF === "new") q = q.eq("source", "own");
+  const { data, error } = await q;
+  if (error) return showMsg(t("failed"), "err");
+  places = data; renderPlaces(); countPending();
+}
+async function countPending() {
+  const { count } = await sb.from("venues").select("id", { count: "exact", head: true }).eq("status", "pending").eq("hidden", false);
+  $("#pendN").hidden = !count; $("#pendN").textContent = count || "";
+}
+function renderPlaces() {
+  chips("#placeF", [["pending", t("fPending")], ["new", t("fNew")], ["hidden", t("fHidden")], ["all", t("fAll")]], placeF, k => { placeF = k; loadPlaces(); });
+  const box = $("#placesList"); box.innerHTML = "";
+  if (!places.length) { box.innerHTML = `<p class="hint">${t("nothing")}</p>`; return; }
+  for (const v of places) {
+    const d = document.createElement("div"); d.className = "card";
+    const pills = (v.hidden ? `<span class="pill bad">${t("hidden")}</span> ` : "") + (v.status === "pending" ? `<span class="pill wait">${t("pending")}</span>` : "");
+    d.innerHTML = `<div class="row"><span class="logo">${logoHtml(v)}</span><div class="grow"><b>${esc(v.name)}</b> ${pills}
+      <div class="who">${esc(catLabel(v.category))}${v.added_by ? " · " + esc(t("byWho", { who: nameOf(v.added_by) })) : ""} · ${esc(when(v.created_at))}</div>
+      <div class="acts">${v.status === "pending" ? `<button class="primary small" type="button" data-ok>${t("approve")}</button>` : ""}
+      <button class="ghost small" type="button" data-hide>${v.hidden ? t("show") : t("hide")}</button></div></div></div>`;
+    d.querySelector("[data-ok]")?.addEventListener("click", ev => setVenue(ev.target, v, { status: "approved" }));
+    d.querySelector("[data-hide]").onclick = ev => setVenue(ev.target, v, { hidden: !v.hidden });
+    box.appendChild(d);
+  }
+}
+async function setVenue(btn, v, fields) {
+  btn.disabled = true;
+  const { error } = await sb.from("venues").update(fields).eq("id", v.id);
+  if (error) { btn.disabled = false; return showMsg(t("failed"), "err"); }
+  delete venueCache[v.id]; edits = []; showMsg(t("saved")); loadPlaces();
+}
+
+// ---------- team ----------
+async function loadTeam() {
+  const { data, error } = await sb.rpc("admin_team");
+  if (error) { teamOk = false; $("#setupMsg").innerHTML = `<div class="msg err">${esc(t("needSql"))}</div>`; team = []; }
+  else { teamOk = true; $("#setupMsg").innerHTML = ""; team = data || []; }
+  render();
+}
+function renderTeam() {
+  const box = $("#teamList"); box.innerHTML = "";
+  for (const m of team) {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<div class="row"><div class="grow"><b>${esc(m.name)}</b> <span class="pill ${m.role === "admin" ? "ok" : "mut"}">${t(m.role)}</span> ${m.active ? "" : `<span class="pill bad">${t("off")}</span>`}
+      <div class="who ltr" style="text-align:start">${esc(m.email)}</div>
+      <div class="stats"><div><div class="stat">${m.edits_today}</div><div class="who">${t("editsToday")}</div></div><div><div class="stat">${m.edits_total}</div><div class="who">${t("editsTotal")}</div></div><div><div class="stat">${m.photos_total}</div><div class="who">${t("photosTotal")}</div></div></div>
+      <div class="who" style="margin-top:6px">${m.last_edit ? esc(t("lastSeen", { d: when(m.last_edit) })) : t("never")}</div>
+      ${m.user_id !== me.id ? `<div class="acts"><button class="${m.active ? "danger" : "ghost"} small" type="button">${m.active ? t("switchOff") : t("switchOn")}</button></div>` : ""}
+    </div></div>`;
+    const btn = d.querySelector("button");
+    if (btn) btn.onclick = async () => {
+      btn.disabled = true;
+      const { error } = await sb.rpc("admin_set_surveyor_active", { p_user: m.user_id, p_active: !m.active });
+      if (error) { btn.disabled = false; return showMsg(t("failed"), "err"); }
+      loadTeam();
+    };
+    box.appendChild(d);
+  }
+}
+$("#addBtn").onclick = async () => {
+  const email = $("#mEmail").value.trim(), name = $("#mName").value.trim();
+  if (!email || !name) return;
+  $("#addBtn").disabled = true;
+  const { error } = await sb.rpc("admin_add_surveyor", { p_email: email, p_name: name, p_role: $("#mRole").value });
+  $("#addBtn").disabled = false;
+  if (error) return showMsg(/no_such_login/.test(error.message) ? t("noLogin") : /function|schema cache/.test(error.message) ? t("needSql") : t("failed"), "err");
+  $("#mEmail").value = ""; $("#mName").value = ""; showMsg(t("addedOk")); loadTeam();
+};
+
+// ---------- settings ----------
+async function loadSettings() {
+  const { data, error } = await sb.from("app_settings").select("key,value");
+  if (error) { $("#setupMsg").innerHTML = `<div class="msg err">${esc(t("needSql"))}</div>`; return; }
+  const s = Object.fromEntries((data || []).map(r => [r.key, r.value]));
+  $("#launchDate").value = s.launch_date || "";
+  $("#gGold").value = s.gifts_per_month?.golden ?? 1; $("#gDia").value = s.gifts_per_month?.diamond ?? 3;
+  showFreeEnd(s.free_plus_days ?? 90);
+}
+function showFreeEnd(days) {
+  const d = $("#launchDate").value;
+  if (!d) { $("#freeEnd").textContent = t("notLaunched"); return; }
+  const end = new Date(d + "T00:00:00"); end.setDate(end.getDate() + Number(days || 90));
+  $("#freeEnd").textContent = t("freeUntil", { d: end.toLocaleDateString(lang === "ckb" ? "ckb-IQ" : "en-GB", { dateStyle: "long" }) });
+}
+$("#launchDate").oninput = () => showFreeEnd(90);
+async function saveSetting(key, value) {
+  const { error } = await sb.from("app_settings").update({ value, updated_at: new Date().toISOString() }).eq("key", key);
+  showMsg(error ? t("failed") : t("saved"), error ? "err" : "ok");
+}
+$("#saveLaunch").onclick = () => saveSetting("launch_date", $("#launchDate").value || null);
+$("#saveGifts").onclick = () => {
+  const g = Math.max(0, Math.min(10, parseInt($("#gGold").value, 10) || 0)), d = Math.max(0, Math.min(10, parseInt($("#gDia").value, 10) || 0));
+  saveSetting("gifts_per_month", { golden: g, diamond: d });
+};
+
+// ---------- sign in ----------
+async function refreshAuth() {
+  if (!sb) return show("login");
+  const { data } = await sb.auth.getSession();
+  me = data.session?.user || null;
+  if (!me) return show("login");
+  const { data: isAdmin } = await sb.rpc("is_admin");
+  if (!isAdmin) { await sb.auth.signOut(); me = null; show("login"); $("#loginMsg").innerHTML = `<div class="msg err">${esc(t("notAdmin"))}</div>`; return; }
+  show("app");
+  await loadTeam();
+  loadChanges(); countPending();
+}
+$("#loginForm").onsubmit = async e => {
+  e.preventDefault(); $("#loginMsg").innerHTML = "";
+  const { error } = await sb.auth.signInWithPassword({ email: $("#email").value.trim(), password: $("#pass").value });
+  if (error) { $("#loginMsg").innerHTML = `<div class="msg err">${esc(t("badLogin"))}</div>`; return; }
+  refreshAuth();
+};
+$("#outBtn").onclick = async () => { await sb.auth.signOut(); me = null; edits = []; photos = []; team = []; show("login"); };
+
+applyLang();
+refreshAuth();
+</script>
+</body>
+</html>
