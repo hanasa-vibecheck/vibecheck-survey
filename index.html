@@ -146,11 +146,11 @@ button:disabled{opacity:.5}
         <div class="have" id="have"></div>
         <p class="hint" data-t="photoHint"></p>
         <div class="photos">
-          <div class="slot"><span data-t="pFront"></span><input type="file" accept="image/*" capture="environment" data-slot="front"></div>
-          <div class="slot"><span data-t="pInside"></span><input type="file" accept="image/*" capture="environment" data-slot="inside"></div>
-          <div class="slot"><span data-t="pTable"></span><input type="file" accept="image/*" capture="environment" data-slot="table"></div>
+          <div class="slot"><span data-t="pFront"></span><input type="file" accept="image/*" data-slot="front"></div>
+          <div class="slot"><span data-t="pInside"></span><input type="file" accept="image/*" data-slot="inside"></div>
+          <div class="slot"><span data-t="pTable"></span><input type="file" accept="image/*" data-slot="table"></div>
           <div class="slot"><span data-t="pMenu"></span><input type="file" accept="image/*" data-slot="menu"></div>
-          <div class="slot"><span data-t="pMore"></span><input type="file" accept="image/*" data-slot="other"></div>
+          <div class="slot"><span data-t="pMore"></span><input type="file" accept="image/*" multiple data-slot="other"></div>
           <div class="slot" id="logoSlot"><span data-t="pLogo"></span><input type="file" accept="image/*" data-slot="logo"></div>
         </div>
         <label class="check" style="margin-top:14px"><input type="checkbox" id="consent"><span data-t="consent"></span></label>
@@ -361,7 +361,7 @@ function renderCats() {
 document.querySelectorAll(".slot input").forEach(inp => {
   inp.onchange = () => {
     const f = inp.files && inp.files[0]; if (!f) return;
-    files[inp.dataset.slot] = f;
+    files[inp.dataset.slot] = inp.dataset.slot === "other" ? [...inp.files] : f;
     const slot = inp.parentElement; slot.querySelector("img")?.remove();
     const img = document.createElement("img"); img.alt = ""; img.src = URL.createObjectURL(f); slot.insertBefore(img, inp);
   };
@@ -416,13 +416,16 @@ $("#saveBtn").onclick = async () => {
       bar.style.width = `${Math.round(++done / total * 100)}%`;
     }
     for (const k of photoSlots) {
-      const blob = await shrink(files[k]);
-      const path = `${venue.id}/${stamp}-${k}.jpg`;
-      const up = await sb.storage.from("venues").upload(path, blob, { contentType: blob.type });
-      if (up.error) throw up.error;
-      const { error } = await sb.from("venue_photos").insert({ venue_id: venue.id, path, kind: k, owner_consent: true, added_by: me.id });
-      if (error) throw error;
-      photoCounts[venue.id] = (photoCounts[venue.id] || 0) + 1;
+      const list = Array.isArray(files[k]) ? files[k] : [files[k]];
+      for (let i = 0; i < list.length; i++) {
+        const blob = await shrink(list[i]);
+        const path = `${venue.id}/${stamp}-${k}${i ? "-" + i : ""}.jpg`;
+        const up = await sb.storage.from("venues").upload(path, blob, { contentType: blob.type });
+        if (up.error) throw up.error;
+        const { error } = await sb.from("venue_photos").insert({ venue_id: venue.id, path, kind: k, owner_consent: true, added_by: me.id });
+        if (error) throw error;
+        photoCounts[venue.id] = (photoCounts[venue.id] || 0) + 1;
+      }
       bar.style.width = `${Math.round(++done / total * 100)}%`;
     }
     [nearList, searchList].forEach(list => { const i = list.findIndex(x => x.id === venue.id); if (i >= 0) list[i] = venue; else if (list === nearList && !cur) list.unshift(venue); });
