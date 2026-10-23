@@ -128,6 +128,8 @@ button:disabled{opacity:.5}
     <div id="claimsBox" hidden>
       <p class="hint" data-t="claimsHint"></p>
       <div id="claimsList"></div>
+      <h2 style="margin:22px 4px 8px" data-t="ownersTitle"></h2>
+      <div id="ownersList"></div>
     </div>
 
     <div id="teamBox" hidden>
@@ -192,7 +194,10 @@ const TXT = {
   badLogin: ["ئیمەیڵ یان وشەی نهێنی هەڵەیە.", "Wrong email or password."], notAdmin: ["ئەم پەڕەیە تەنها بۆ بەڕێوەبەرە.", "This page is for admins only."],
   needSql: ["هەندێک بەش کار ناکەن تا فایلی 0003_admin_plans.sql لە Supabase SQL Editor جێبەجێ نەکەیت.", "Some parts need the database update 0003_admin_plans.sql (Supabase → SQL Editor)."],
   tabChanges: ["گۆڕانکاری", "Changes"], tabPhotos: ["وێنە", "Photos"], tabPlaces: ["شوێن", "Places"], tabTeam: ["تیم", "Team"], tabClaims: ["خاوەنەکان", "Owners"],
-  plus: ["Plus", "Plus"], payTitle: ["پارەدانەکانی FIB", "FIB payments"], payHint: ["دوایین پارەدانەکان لە ماڵپەڕەکەوە.", "Latest payments from the website."],
+  plus: ["Plus", "Plus"], ownersTitle: ["خاوەنە پەسەندکراوەکان", "Approved owners"],
+  removeOwner: ["لابردنی خاوەن", "Remove owner"], openBookings: ["{n} حجزی کراوە", "{n} open bookings"],
+  removeAsk: ["{who} وەک خاوەنی {place} لاببرێت؟ حجزە کراوەکان ڕەتدەکرێنەوە و میوانەکان ئاگادار دەکرێنەوە.", "Remove {who} as owner of {place}? Open bookings will be declined and the guests told."],
+  removeWhy: ["هۆکار بۆ میوانەکان (ئارەزوومەندانە)", "Message for guests with open bookings (optional)"], need0011: ["سەرەتا 0011_admin_owners.sql لە Supabase ڕەن بکە.", "Run 0011_admin_owners.sql in Supabase first."], payTitle: ["پارەدانەکانی FIB", "FIB payments"], payHint: ["دوایین پارەدانەکان لە ماڵپەڕەکەوە.", "Latest payments from the website."],
   pay_paid: ["دراوە", "Paid"], pay_unpaid: ["نەدراوە", "Not paid"], pay_declined: ["ڕەتکراوە", "Declined"], pay_expired: ["بەسەرچوو", "Expired"], pay_cancelled: ["هەڵوەشاوە", "Cancelled"],
   claimsHint: ["داواکاری خاوەنی شوێن. پێش پەسەندکردن پەیوەندی بە ژمارەکەوە بکە و مۆڵەت و ناسنامەکە بپشکنە.", "Venue owner claims. Call the number and check the licence and ID before approving."],
   claimLic: ["مۆڵەت: {x}", "Licence: {x}"], reject: ["ڕەتکردنەوە", "Reject"], rejectWhy: ["هۆکاری ڕەتکردنەوە (بۆ خاوەنەکە)", "Reason for rejecting (shown to the owner)"],
@@ -418,6 +423,31 @@ function renderPlaces() {
     box.appendChild(d);
   }
 }
+async function loadOwners() {
+  const box = $("#ownersList");
+  const { data, error } = await sb.rpc("admin_owners");
+  if (error) { box.innerHTML = `<p class="hint">${esc(/function|schema cache/.test(error.message) ? t("need0011") : t("failed"))}</p>`; return; }
+  const list = Array.isArray(data) ? data : [];
+  box.innerHTML = list.length ? "" : `<p class="hint">${t("nothing")}</p>`;
+  for (const o of list) {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<div class="grow"><b>${esc(o.venue_name)}</b>
+      <div class="who">${esc(o.owner_name || "?")}${o.username ? " · @" + esc(o.username) : ""}${o.contact_phone ? ` · <a class="ltr" href="tel:${esc(o.contact_phone)}">${esc(o.contact_phone)}</a>` : ""}${o.approved_at ? " · " + esc(when(o.approved_at)) : ""}</div>
+      ${o.open_bookings > 0 ? `<div class="who">${esc(t("openBookings", { n: o.open_bookings }))}</div>` : ""}
+      <div class="acts"><button class="danger small" type="button">${t("removeOwner")}</button></div></div>`;
+    const btn = d.querySelector("button");
+    btn.onclick = async () => {
+      if (!confirm(t("removeAsk", { who: o.owner_name || "?", place: o.venue_name }))) return;
+      let reason = "";
+      if (o.open_bookings > 0) { const r = prompt(t("removeWhy")); if (r === null) return; reason = r.trim(); }
+      btn.disabled = true;
+      const { error } = await sb.rpc("admin_remove_owner", { p_venue: o.venue_id, p_reason: reason || null });
+      if (error) { btn.disabled = false; return showMsg(t("failed"), "err"); }
+      showMsg(t("saved")); loadOwners();
+    };
+    box.appendChild(d);
+  }
+}
 async function setVenue(btn, v, fields) {
   btn.disabled = true;
   const { error } = await sb.from("venues").update(fields).eq("id", v.id);
@@ -460,6 +490,7 @@ async function loadClaims() {
     d.querySelector("[data-no]").onclick = ev => { const r = prompt(t("rejectWhy")); if (r !== null) decide(ev.target, false, r.trim()); };
     box.appendChild(d);
   }
+  loadOwners();
 }
 
 // ---------- team ----------
