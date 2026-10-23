@@ -101,6 +101,7 @@ button:disabled{opacity:.5}
       <button type="button" data-tab="changes" class="on"><span data-t="tabChanges"></span></button>
       <button type="button" data-tab="photos"><span data-t="tabPhotos"></span></button>
       <button type="button" data-tab="places"><span data-t="tabPlaces"></span><span class="n" id="pendN" hidden></span></button>
+      <button type="button" data-tab="payments"><span data-t="tabPayments"></span><span class="n" id="payN" hidden></span></button>
       <button type="button" data-tab="claims"><span data-t="tabClaims"></span><span class="n" id="claimN" hidden></span></button>
       <button type="button" data-tab="team"><span data-t="tabTeam"></span></button>
       <button type="button" data-tab="settings"><span data-t="tabSettings"></span></button>
@@ -123,6 +124,19 @@ button:disabled{opacity:.5}
       <div class="chips" id="placeF"></div>
       <input id="q" type="search" data-ph="searchPh" style="margin-bottom:10px">
       <div id="placesList"></div>
+    </div>
+
+    <div id="paymentsBox" hidden>
+      <div class="card">
+        <h2 data-t="payWhere"></h2>
+        <p class="hint" data-t="payWhereHint"></p>
+        <label for="fibNumber" data-t="fibNumber"></label><input id="fibNumber" type="text" inputmode="tel" class="ltr" placeholder="0750 123 4567">
+        <label for="fibName" data-t="fibName" style="margin-top:8px"></label><input id="fibName" type="text" class="ltr">
+        <button class="primary" type="button" id="savePayWhere" style="width:100%;margin-top:12px" data-t="save"></button>
+      </div>
+      <div class="chips" id="payF"></div>
+      <p class="hint" id="payTotal"></p>
+      <div id="payList"></div>
     </div>
 
     <div id="claimsBox" hidden>
@@ -169,11 +183,6 @@ button:disabled{opacity:.5}
         <button class="primary" type="button" id="saveGifts" style="width:100%;margin-top:12px" data-t="save"></button>
       </div>
       <div class="card">
-        <h2 data-t="payTitle"></h2>
-        <p class="hint" data-t="payHint"></p>
-        <div id="payList"></div>
-      </div>
-      <div class="card">
         <h2 data-t="linksTitle"></h2>
         <p><a href="../" data-t="surveyLink"></a></p>
       </div>
@@ -194,11 +203,17 @@ const TXT = {
   badLogin: ["ئیمەیڵ یان وشەی نهێنی هەڵەیە.", "Wrong email or password."], notAdmin: ["ئەم پەڕەیە تەنها بۆ بەڕێوەبەرە.", "This page is for admins only."],
   needSql: ["هەندێک بەش کار ناکەن تا فایلی 0003_admin_plans.sql لە Supabase SQL Editor جێبەجێ نەکەیت.", "Some parts need the database update 0003_admin_plans.sql (Supabase → SQL Editor)."],
   tabChanges: ["گۆڕانکاری", "Changes"], tabPhotos: ["وێنە", "Photos"], tabPlaces: ["شوێن", "Places"], tabTeam: ["تیم", "Team"], tabClaims: ["خاوەنەکان", "Owners"],
-  plus: ["Plus", "Plus"], ownersTitle: ["خاوەنە پەسەندکراوەکان", "Approved owners"],
+  plus: ["Plus", "Plus"], tabPayments: ["پارەدان", "Payments"],
+  payWhere: ["ژمارەی FIB بۆ وەرگرتنی پارە", "FIB number for payments"], payWhereHint: ["کڕیاران لە پەڕەی پارەدان ئەم ژمارە و ناوە دەبینن. تا ژمارەکە زیاد نەکەیت، پارەدان داخراوە.", "Customers see this number and name on the payment page. Payments stay closed until a number is set."],
+  fibNumber: ["ژمارەی FIB", "FIB number"], fibName: ["ناوی خاوەن هەژمار (وەک لە FIB دەردەکەوێت)", "Account name (as shown in FIB)"],
+  fWaiting: ["چاوەڕێی پشتڕاستکردنەوە", "To check"], fPaid: ["دراوە", "Paid"], confirmPay: ["پشتڕاستکردنەوە – پارە گەیشت", "Confirm – money received"], rejectPay: ["نەگەیشت", "Not received"],
+  confirmPayAsk: ["{amount} IQD بە کۆدی {code} لە FIB گەیشتووە؟ پلانی {who} چالاک دەبێت.", "Did {amount} IQD with code {code} arrive in FIB? {who}'s plan will switch on."],
+  rejectPayAsk: ["تێبینی بۆ تۆمار (ئارەزوومەندانە)", "Note for the record (optional)"], reportedAt: ["وتی پارەی داوە {d}", "Said paid {d}"], startedAt: ["دەستی پێکرد {d}", "Started {d}"],
+  totalPaid: ["کۆی دراو: {n} IQD", "Total paid: {n} IQD"], need0012: ["سەرەتا 0012_manual_payments.sql لە Supabase ڕەن بکە.", "Run 0012_manual_payments.sql in Supabase first."], ownersTitle: ["خاوەنە پەسەندکراوەکان", "Approved owners"],
   removeOwner: ["لابردنی خاوەن", "Remove owner"], openBookings: ["{n} حجزی کراوە", "{n} open bookings"],
   removeAsk: ["{who} وەک خاوەنی {place} لاببرێت؟ حجزە کراوەکان ڕەتدەکرێنەوە و میوانەکان ئاگادار دەکرێنەوە.", "Remove {who} as owner of {place}? Open bookings will be declined and the guests told."],
   removeWhy: ["هۆکار بۆ میوانەکان (ئارەزوومەندانە)", "Message for guests with open bookings (optional)"], need0011: ["سەرەتا 0011_admin_owners.sql لە Supabase ڕەن بکە.", "Run 0011_admin_owners.sql in Supabase first."], payTitle: ["پارەدانەکانی FIB", "FIB payments"], payHint: ["دوایین پارەدانەکان لە ماڵپەڕەکەوە.", "Latest payments from the website."],
-  pay_paid: ["دراوە", "Paid"], pay_unpaid: ["نەدراوە", "Not paid"], pay_declined: ["ڕەتکراوە", "Declined"], pay_expired: ["بەسەرچوو", "Expired"], pay_cancelled: ["هەڵوەشاوە", "Cancelled"],
+  pay_paid: ["دراوە", "Paid"], pay_reported: ["بپشکنە", "To check"], pay_unpaid: ["نەدراوە", "Not paid"], pay_declined: ["ڕەتکراوە", "Declined"], pay_expired: ["بەسەرچوو", "Expired"], pay_cancelled: ["هەڵوەشاوە", "Cancelled"],
   claimsHint: ["داواکاری خاوەنی شوێن. پێش پەسەندکردن پەیوەندی بە ژمارەکەوە بکە و مۆڵەت و ناسنامەکە بپشکنە.", "Venue owner claims. Call the number and check the licence and ID before approving."],
   claimLic: ["مۆڵەت: {x}", "Licence: {x}"], reject: ["ڕەتکردنەوە", "Reject"], rejectWhy: ["هۆکاری ڕەتکردنەوە (بۆ خاوەنەکە)", "Reason for rejecting (shown to the owner)"],
   approveAsk: ["{who} ببێتە خاوەنی {place}؟ پەیوەندیت پێوە کرد و بەڵگەنامەکانت پشکنی؟", "Make {who} the owner of {place}? Did you call them and check the documents?"],
@@ -273,7 +288,7 @@ function logoHtml(v) { return v && v.logo_path ? `<img alt="" src="${esc(publicU
 document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { tab = b.dataset.tab; render(); load(); });
 function render() {
   document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-  for (const k of ["changes", "photos", "places", "claims", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
+  for (const k of ["changes", "photos", "places", "payments", "claims", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
   if (tab === "changes") renderChanges();
   if (tab === "photos") renderPhotos();
   if (tab === "places") renderPlaces();
@@ -286,6 +301,7 @@ function load() {
   if (tab === "team") loadTeam();
   if (tab === "settings") loadSettings();
   if (tab === "claims") loadClaims();
+  if (tab === "payments") loadPayments();
 }
 function chips(sel, opts, cur, on) {
   const box = $(sel); box.innerHTML = "";
@@ -545,19 +561,52 @@ async function loadSettings() {
   $("#launchDate").value = s.launch_date || "";
   $("#gGold").value = s.gifts_per_month?.golden ?? 1; $("#gDia").value = s.gifts_per_month?.diamond ?? 3;
   showFreeEnd(s.free_plus_days ?? 90);
-  loadPayments();
 }
+let payF = "reported";
 async function loadPayments() {
+  const { data: cfg } = await sb.from("app_settings").select("value").eq("key", "payments").maybeSingle();
+  if (cfg?.value && document.activeElement !== $("#fibNumber") && document.activeElement !== $("#fibName")) {
+    $("#fibNumber").value = cfg.value.fib_number || ""; $("#fibName").value = cfg.value.fib_name || "";
+  }
+  chips("#payF", [["reported", t("fWaiting")], ["paid", t("fPaid")], ["all", t("fAll")]], payF, k => { payF = k; loadPayments(); });
   const box = $("#payList");
-  const { data, error } = await sb.rpc("admin_payments", { max_rows: 50 });
-  if (error) { box.innerHTML = `<p class="hint">${esc(/function|schema cache/.test(error.message) ? t("need0008").replace("0008_reservations", "0009_fib_payments") : t("failed"))}</p>`; return; }
-  const list = Array.isArray(data) ? data : [];
-  if (!list.length) { box.innerHTML = `<p class="hint">${t("nothing")}</p>`; return; }
-  const paid = list.filter(p => p.status === "paid").reduce((a, p) => a + p.amount_iqd, 0);
-  box.innerHTML = `<p><b class="ltr">${paid.toLocaleString("en")} IQD</b></p>` + list.map(p => `<div class="row" style="padding:6px 0;border-top:1px solid var(--line)"><div class="grow"><b>${esc(p.display_name || "?")}</b> · ${esc(t(p.tier))}
-    <div class="who">${esc(when(p.created_at))} · <span class="ltr">${p.amount_iqd.toLocaleString("en")} IQD</span></div></div>
-    <span class="pill ${p.status === "paid" ? "ok" : p.status === "unpaid" ? "wait" : "mut"}">${t("pay_" + p.status)}</span></div>`).join("");
+  const { data, error } = await sb.rpc("admin_payments", { max_rows: 200 });
+  if (error) { box.innerHTML = `<p class="hint">${esc(/function|schema cache|column/.test(error.message) ? t("need0012") : t("failed"))}</p>`; return; }
+  const all = Array.isArray(data) ? data : [];
+  const waiting = all.filter(p => p.status === "reported");
+  $("#payN").hidden = !waiting.length; $("#payN").textContent = waiting.length || "";
+  const paid = all.filter(p => p.status === "paid").reduce((a, p) => a + p.amount_iqd, 0);
+  $("#payTotal").textContent = t("totalPaid", { n: paid.toLocaleString("en") });
+  const list = payF === "all" ? all : all.filter(p => p.status === payF);
+  box.innerHTML = list.length ? "" : `<p class="hint">${t("nothing")}</p>`;
+  for (const p of list) {
+    const d = document.createElement("div"); d.className = "card";
+    const open = p.status === "reported" || p.status === "unpaid";
+    d.innerHTML = `<div class="grow"><b class="ltr" style="font-size:18px">${esc(p.fib_payment_id)}</b> <span class="pill ${p.status === "paid" ? "ok" : p.status === "reported" ? "wait" : "mut"}">${t("pay_" + p.status)}</span>
+      <div><b>${esc(p.display_name || "?")}</b>${p.username ? " · @" + esc(p.username) : ""}${p.phone ? ` · <a class="ltr" href="tel:${esc(p.phone)}">${esc(p.phone)}</a>` : ""}</div>
+      <div class="who">${esc(t(p.tier))} · <b class="ltr">${p.amount_iqd.toLocaleString("en")} IQD</b> · ${esc(p.reported_at ? t("reportedAt", { d: when(p.reported_at) }) : t("startedAt", { d: when(p.created_at) }))}</div>
+      ${p.admin_note ? `<div class="who">${esc(p.admin_note)}</div>` : ""}
+      ${open ? `<div class="acts"><button class="primary small" type="button" data-ok>${t("confirmPay")}</button><button class="danger small" type="button" data-no>${t("rejectPay")}</button></div>` : ""}</div>`;
+    const act = async (btn, fn, args) => {
+      btn.disabled = true;
+      const { error } = await sb.rpc(fn, args);
+      if (error) { btn.disabled = false; return showMsg(t("failed"), "err"); }
+      showMsg(t("saved")); loadPayments();
+    };
+    d.querySelector("[data-ok]")?.addEventListener("click", ev => {
+      if (confirm(t("confirmPayAsk", { amount: p.amount_iqd.toLocaleString("en"), code: p.fib_payment_id, who: p.display_name || "?" }))) act(ev.target, "admin_confirm_payment", { p_id: p.id });
+    });
+    d.querySelector("[data-no]")?.addEventListener("click", ev => {
+      const n = prompt(t("rejectPayAsk")); if (n !== null) act(ev.target, "admin_reject_payment", { p_id: p.id, p_note: n.trim() || null });
+    });
+    box.appendChild(d);
+  }
 }
+$("#savePayWhere").onclick = async () => {
+  const { data: cfg } = await sb.from("app_settings").select("value").eq("key", "payments").maybeSingle();
+  const v = { ...(cfg?.value || { mode: "manual", hours: "09:00–24:00" }), fib_number: $("#fibNumber").value.trim() || null, fib_name: $("#fibName").value.trim() || null };
+  saveSetting("payments", v);
+};
 function showFreeEnd(days) {
   const d = $("#launchDate").value;
   if (!d) { $("#freeEnd").textContent = t("notLaunched"); return; }
@@ -585,7 +634,8 @@ async function refreshAuth() {
   if (!isAdmin) { await sb.auth.signOut(); me = null; show("login"); $("#loginMsg").innerHTML = `<div class="msg err">${esc(t("notAdmin"))}</div>`; return; }
   show("app");
   await loadTeam();
-  loadChanges(); countPending(); loadClaims();
+  loadChanges(); countPending(); loadClaims(); loadPayments();
+  if (!window._payTimer) window._payTimer = setInterval(() => { if (!document.hidden && tab === "payments") loadPayments(); }, 30000);
 }
 $("#loginForm").onsubmit = async e => {
   e.preventDefault(); $("#loginMsg").innerHTML = "";
