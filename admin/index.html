@@ -105,6 +105,8 @@ button:disabled{opacity:.5}
       <button type="button" data-tab="support"><span data-t="tabSupport"></span><span class="n" id="supN" hidden></span></button>
       <button type="button" data-tab="ads"><span data-t="tabAds"></span><span class="n" id="adN" hidden></span></button>
       <button type="button" data-tab="codes"><span data-t="tabCodes"></span></button>
+      <button type="button" data-tab="reports"><span data-t="tabReports"></span><span class="n" id="repN" hidden></span></button>
+      <button type="button" data-tab="users"><span data-t="tabUsers"></span></button>
       <button type="button" data-tab="claims"><span data-t="tabClaims"></span><span class="n" id="claimN" hidden></span></button>
       <button type="button" data-tab="team"><span data-t="tabTeam"></span></button>
       <button type="button" data-tab="settings"><span data-t="tabSettings"></span></button>
@@ -168,6 +170,16 @@ button:disabled{opacity:.5}
       <div id="codeList"></div>
     </div>
 
+    <div id="reportsBox" hidden>
+      <div class="chips" id="repF"></div>
+      <div id="repList"></div>
+    </div>
+
+    <div id="usersBox" hidden>
+      <input id="uq" type="search" data-ph="userSearchPh" style="margin-bottom:10px">
+      <div id="userList"></div>
+    </div>
+
     <div id="claimsBox" hidden>
       <p class="hint" data-t="claimsHint"></p>
       <div id="claimsList"></div>
@@ -212,6 +224,13 @@ button:disabled{opacity:.5}
         <button class="primary" type="button" id="saveGifts" style="width:100%;margin-top:12px" data-t="save"></button>
       </div>
       <div class="card">
+        <h2 data-t="announceTitle"></h2>
+        <p class="hint" data-t="announceHint"></p>
+        <select id="annAud"><option value="everyone" data-t="audEveryone"></option><option value="owners" data-t="audOwners"></option><option value="vip" data-t="audVip"></option></select>
+        <textarea id="annText" rows="3" maxlength="300" style="margin-top:8px"></textarea>
+        <button class="primary" type="button" id="annBtn" style="width:100%;margin-top:10px" data-t="announceBtn"></button>
+      </div>
+      <div class="card">
         <h2 data-t="linksTitle"></h2>
         <p><a href="../" data-t="surveyLink"></a></p>
       </div>
@@ -232,7 +251,14 @@ const TXT = {
   badLogin: ["ئیمەیڵ یان وشەی نهێنی هەڵەیە.", "Wrong email or password."], notAdmin: ["ئەم پەڕەیە تەنها بۆ بەڕێوەبەرە.", "This page is for admins only."],
   needSql: ["هەندێک بەش کار ناکەن تا فایلی 0003_admin_plans.sql لە Supabase SQL Editor جێبەجێ نەکەیت.", "Some parts need the database update 0003_admin_plans.sql (Supabase → SQL Editor)."],
   tabChanges: ["گۆڕانکاری", "Changes"], tabPhotos: ["وێنە", "Photos"], tabPlaces: ["شوێن", "Places"], tabTeam: ["تیم", "Team"], tabClaims: ["خاوەنەکان", "Owners"],
-  plus: ["Plus", "Plus"], tabAds: ["ڕیکلام", "Ads"], tabCodes: ["کۆدەکان", "Codes"],
+  plus: ["Plus", "Plus"], tabReports: ["ڕاپۆرت", "Reports"], tabUsers: ["بەکارهێنەران", "Users"],
+  fDismissed: ["پشتگوێخراو", "Dismissed"], fActioned: ["چارەسەرکراو", "Actioned"], dismiss: ["پشتگوێخستن", "Dismiss"], removeContent: ["لابردنی ناوەڕۆک", "Remove content"],
+  banDays: ["ڕاگرتنی هەژمار – چەند ڕۆژ؟ (0 = نا)", "Pause the account – how many days? (0 = no)"], reportsAgainst: ["{n} ڕاپۆرت دژی ئەم کەسە", "{n} reports against this person"],
+  reportedBy: ["ڕاپۆرت لەلایەن {who}", "Reported by {who}"], need0018: ["سەرەتا 0017 و 0018 لە Supabase ڕەن بکە.", "Run 0017 and 0018 in Supabase first."],
+  userSearchPh: ["ناو، @ناو، یان ژمارە…", "Name, @username or phone…"], banned: ["ڕاگیراوە تا {d}", "Paused until {d}"], banUser: ["ڕاگرتن", "Pause"], unban: ["لابردنی ڕاگرتن", "Unpause"],
+  givePlusPlan: ["پلان بدە", "Give plan"], tierAsk: ["پلان: plus، golden یان diamond", "Plan: plus, golden or diamond"],
+  announceTitle: ["ڕاگەیاندن", "Announcement"], announceHint: ["لە زەنگی ئاگادارکردنەوەی ئەپدا دەردەکەوێت.", "Shows in the notification bell in the app."], announceBtn: ["ناردن", "Send"],
+  audEveryone: ["هەمووان", "Everyone"], audOwners: ["خاوەن شوێنەکان", "Venue owners"], audVip: ["Golden و Diamond", "Golden & Diamond"], announceAsk: ["بۆ هەموو ئەم گرووپە بنێردرێت؟", "Send to everyone in this group?"], announced: ["نێردرا بۆ {n} کەس", "Sent to {n} people"], tabAds: ["ڕیکلام", "Ads"], tabCodes: ["کۆدەکان", "Codes"],
   fRejected: ["ڕەتکراوە", "Rejected"], fApproved: ["پەسەندکراو", "Approved"], adStats: ["{v} بینین · {t} دەستلێدان", "{v} views · {t} taps"],
   rejectAd: ["ڕەتکردنەوە", "Reject"], takeDown: ["لابردن", "Take down"], adWhy: ["هۆکار بۆ خاوەنەکە", "Reason for the owner"], need0015: ["سەرەتا 0015_venue_plans.sql و 0016 لە Supabase ڕەن بکە.", "Run 0015_venue_plans.sql and 0016 in Supabase first."],
   makeCodes: ["دروستکردنی کۆد", "Make codes"], makeCodesHint: ["کۆدی Pro/Premium بۆ شوێنەکان (لە ئەپدا دەینووسن). کۆدی Golden/Diamond/Plus بۆ کارتی QR (دواتر لە ماڵپەڕ).", "Pro/Premium codes for venues (they enter them in the owner app). Golden/Diamond/Plus codes are for QR cards (activated on the website later)."],
@@ -326,7 +352,7 @@ function logoHtml(v) { return v && v.logo_path ? `<img alt="" src="${esc(publicU
 document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { tab = b.dataset.tab; render(); load(); });
 function render() {
   document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-  for (const k of ["changes", "photos", "places", "payments", "support", "ads", "codes", "claims", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
+  for (const k of ["changes", "photos", "places", "payments", "support", "ads", "codes", "reports", "users", "claims", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
   if (tab === "changes") renderChanges();
   if (tab === "photos") renderPhotos();
   if (tab === "places") renderPlaces();
@@ -343,6 +369,8 @@ function load() {
   if (tab === "support") loadSupport();
   if (tab === "ads") loadAds();
   if (tab === "codes") loadCodes();
+  if (tab === "reports") loadReports();
+  if (tab === "users") loadUsers();
 }
 function chips(sel, opts, cur, on) {
   const box = $(sel); box.innerHTML = "";
@@ -677,6 +705,86 @@ $("#makeCodesBtn").onclick = async () => {
   loadCodes();
 };
 
+// ---------- reports ----------
+let repF = "open";
+async function loadReports() {
+  chips("#repF", [["open", t("fOpen")], ["actioned", t("fActioned")], ["dismissed", t("fDismissed")], ["all", t("fAll")]], repF, k => { repF = k; loadReports(); });
+  const box = $("#repList");
+  const { data, error } = await sb.rpc("admin_reports", { p_status: repF });
+  if (error) { box.innerHTML = `<p class="hint">${esc(/function|schema cache/.test(error.message) ? t("need0018") : t("failed"))}</p>`; return; }
+  const list = Array.isArray(data) ? data : [];
+  if (repF === "open") { $("#repN").hidden = !list.length; $("#repN").textContent = list.length || ""; }
+  box.innerHTML = list.length ? "" : `<p class="hint">${t("nothing")}</p>`;
+  for (const r of list) {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<div class="grow"><b>${esc(r.target_kind)}</b> · <span class="pill wait">${esc(r.reason)}</span> ${r.status !== "open" ? `<span class="pill mut">${esc(r.action || r.status)}</span>` : ""}
+      <div><b>${esc(r.target_name || "?")}</b>${r.target_username ? " · @" + esc(r.target_username) : ""} ${r.reports_against_user > 1 ? `<span class="pill bad">${esc(t("reportsAgainst", { n: r.reports_against_user }))}</span>` : ""}</div>
+      ${r.snapshot ? `<pre style="white-space:pre-wrap;background:var(--soft,#EFEAF4);padding:8px;border-radius:10px;font:inherit;font-size:14px">${esc(r.snapshot)}</pre>` : ""}
+      ${r.details ? `<div>${esc(r.details)}</div>` : ""}
+      <div class="who">${esc(t("reportedBy", { who: r.reporter_name || "?" }))} · ${esc(when(r.created_at))}</div>
+      ${r.status === "open" ? `<div class="acts"><button class="ghost small" type="button" data-a="dismiss">${t("dismiss")}</button>
+        ${["message", "group_message", "review", "photo", "ad"].includes(r.target_kind) ? `<button class="danger small" type="button" data-a="remove">${t("removeContent")}</button>` : ""}
+        ${r.target_user ? `<button class="danger small" type="button" data-a="ban">${t("banUser")}</button>` : ""}</div>` : ""}</div>`;
+    d.querySelectorAll("[data-a]").forEach(b => b.onclick = async () => {
+      const a = b.dataset.a; let days = null;
+      if (a === "ban") { days = parseInt(prompt(t("banDays"), "7") || "0", 10); if (!(days > 0)) return; }
+      b.disabled = true;
+      const { error } = await sb.rpc("admin_decide_report", { p_report: r.id, p_action: a === "ban" ? "remove" : a, p_ban_days: days, p_note: r.reason });
+      if (error) { b.disabled = false; return showMsg(t("failed"), "err"); }
+      showMsg(t("saved")); loadReports();
+    });
+    box.appendChild(d);
+  }
+}
+
+// ---------- users ----------
+let uqTimer = null;
+$("#uq").oninput = () => { clearTimeout(uqTimer); uqTimer = setTimeout(loadUsers, 300); };
+async function loadUsers() {
+  const box = $("#userList");
+  const { data, error } = await sb.rpc("admin_users", { p_query: $("#uq").value.trim(), max_rows: 60 });
+  if (error) { box.innerHTML = `<p class="hint">${esc(/function|schema cache/.test(error.message) ? t("need0018") : t("failed"))}</p>`; return; }
+  const list = Array.isArray(data) ? data : [];
+  box.innerHTML = list.length ? "" : `<p class="hint">${t("nothing")}</p>`;
+  for (const u of list) {
+    const d = document.createElement("div"); d.className = "card";
+    const ban = u.banned_until && new Date(u.banned_until) > new Date();
+    d.innerHTML = `<div class="row"><div class="grow"><b>${esc(u.display_name)}</b>${u.username ? " · @" + esc(u.username) : ""} ${u.plan ? `<span class="pill ok">${esc(u.plan)}</span>` : ""} ${u.is_owner ? `<span class="pill mut">${t("owner")}</span>` : ""} ${ban ? `<span class="pill bad">${esc(t("banned", { d: when(u.banned_until) }))}</span>` : ""}
+      <div class="who">${u.phone ? `<a class="ltr" href="tel:${esc(u.phone)}">${esc(u.phone)}</a> · ` : ""}${esc(when(u.created_at))} · ${u.checkins} check-ins${u.reports ? " · " + esc(t("reportsAgainst", { n: u.reports })) : ""}</div>
+      <div class="acts"><button class="ghost small" type="button" data-plan>${t("givePlusPlan")}</button><button class="${ban ? "ghost" : "danger"} small" type="button" data-ban>${ban ? t("unban") : t("banUser")}</button></div></div></div>`;
+    d.querySelector("[data-plan]").onclick = async ev => {
+      const tier = (prompt(t("tierAsk"), "golden") || "").trim().toLowerCase(); if (!["plus", "golden", "diamond"].includes(tier)) return;
+      const days = parseInt(prompt(t("giveDaysAsk"), "30") || "", 10); if (!(days > 0)) return;
+      ev.target.disabled = true;
+      const { error } = await sb.rpc("admin_grant_plan", { p_user: u.id, p_tier: tier, p_days: days, p_note: prompt(t("giveNoteAsk")) || null });
+      ev.target.disabled = false;
+      if (error) return showMsg(t("failed"), "err");
+      showMsg(t("saved")); loadUsers();
+    };
+    d.querySelector("[data-ban]").onclick = async ev => {
+      let days = 0;
+      if (!ban) { days = parseInt(prompt(t("banDays"), "7") || "0", 10); if (!(days > 0)) return; }
+      ev.target.disabled = true;
+      const { error } = await sb.rpc("admin_set_ban", { p_user: u.id, p_days: days, p_reason: null });
+      ev.target.disabled = false;
+      if (error) return showMsg(t("failed"), "err");
+      showMsg(t("saved")); loadUsers();
+    };
+    box.appendChild(d);
+  }
+}
+
+// ---------- announcements ----------
+$("#annBtn").onclick = async () => {
+  const text = $("#annText").value.trim(); if (text.length < 2) return;
+  if (!confirm(t("announceAsk", { n: "" }))) return;
+  $("#annBtn").disabled = true;
+  const { data, error } = await sb.rpc("admin_announce", { p_body: text, p_audience: $("#annAud").value });
+  $("#annBtn").disabled = false;
+  if (error) return showMsg(/function|schema cache/.test(error.message) ? t("need0018") : t("failed"), "err");
+  $("#annText").value = ""; showMsg(t("announced", { n: data }));
+};
+
 // ---------- team ----------
 async function loadTeam() {
   const { data, error } = await sb.rpc("admin_team");
@@ -802,7 +910,7 @@ async function refreshAuth() {
   if (!isAdmin) { await sb.auth.signOut(); me = null; show("login"); $("#loginMsg").innerHTML = `<div class="msg err">${esc(t("notAdmin"))}</div>`; return; }
   show("app");
   await loadTeam();
-  loadChanges(); countPending(); loadClaims(); loadPayments(); loadAds();
+  loadChanges(); countPending(); loadClaims(); loadPayments(); loadAds(); loadReports();
   loadSupport();
   if (!window._payTimer) window._payTimer = setInterval(() => {
     if (document.hidden) return;
