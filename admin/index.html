@@ -26,7 +26,7 @@ h1{font-size:22px;margin:4px 0 12px}
 h2{font-size:16px;margin:0 0 10px}
 label{display:block;font-weight:600;margin:10px 0 6px}
 .hint{color:var(--muted);font-size:13.5px;margin:2px 0 8px}
-input[type=text],input[type=email],input[type=password],input[type=search],input[type=date],select{width:100%;font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
+input[type=text],input[type=email],input[type=password],input[type=search],input[type=date],select,textarea{width:100%;font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
 input:focus,select:focus{outline:2px solid var(--coral);border-color:transparent}
 .ltr{direction:ltr;text-align:left}
 button{font:inherit;font-weight:800;border:0;border-radius:14px;padding:14px 16px;min-height:48px;cursor:pointer}
@@ -102,6 +102,7 @@ button:disabled{opacity:.5}
       <button type="button" data-tab="photos"><span data-t="tabPhotos"></span></button>
       <button type="button" data-tab="places"><span data-t="tabPlaces"></span><span class="n" id="pendN" hidden></span></button>
       <button type="button" data-tab="payments"><span data-t="tabPayments"></span><span class="n" id="payN" hidden></span></button>
+      <button type="button" data-tab="support"><span data-t="tabSupport"></span><span class="n" id="supN" hidden></span></button>
       <button type="button" data-tab="claims"><span data-t="tabClaims"></span><span class="n" id="claimN" hidden></span></button>
       <button type="button" data-tab="team"><span data-t="tabTeam"></span></button>
       <button type="button" data-tab="settings"><span data-t="tabSettings"></span></button>
@@ -137,6 +138,11 @@ button:disabled{opacity:.5}
       <div class="chips" id="payF"></div>
       <p class="hint" id="payTotal"></p>
       <div id="payList"></div>
+    </div>
+
+    <div id="supportBox" hidden>
+      <div class="chips" id="supF"></div>
+      <div id="supList"></div>
     </div>
 
     <div id="claimsBox" hidden>
@@ -203,7 +209,10 @@ const TXT = {
   badLogin: ["ئیمەیڵ یان وشەی نهێنی هەڵەیە.", "Wrong email or password."], notAdmin: ["ئەم پەڕەیە تەنها بۆ بەڕێوەبەرە.", "This page is for admins only."],
   needSql: ["هەندێک بەش کار ناکەن تا فایلی 0003_admin_plans.sql لە Supabase SQL Editor جێبەجێ نەکەیت.", "Some parts need the database update 0003_admin_plans.sql (Supabase → SQL Editor)."],
   tabChanges: ["گۆڕانکاری", "Changes"], tabPhotos: ["وێنە", "Photos"], tabPlaces: ["شوێن", "Places"], tabTeam: ["تیم", "Team"], tabClaims: ["خاوەنەکان", "Owners"],
-  plus: ["Plus", "Plus"], tabPayments: ["پارەدان", "Payments"],
+  plus: ["Plus", "Plus"], tabSupport: ["پشتگیری", "Support"], fOpen: ["کراوە", "Open"], fSolved: ["چارەسەرکراو", "Solved"],
+  replyPh: ["وەڵام بنووسە…", "Write a reply…"], send: ["ناردن", "Send"], markSolved: ["چارەسەر کرا", "Mark solved"], reopen: ["دووبارە کردنەوە", "Reopen"],
+  team: ["تیم", "Team"], owner: ["خاوەن شوێن", "Venue owner"], need0013: ["سەرەتا 0013_support.sql لە Supabase ڕەن بکە.", "Run 0013_support.sql in Supabase first."],
+  t_plan: ["پلانەکان", "Plans"], t_payment: ["پارەدان", "Payment"], t_booking: ["حجز", "Booking"], t_account: ["هەژمار", "Account"], t_bug: ["کێشە لە ئەپ", "App problem"], t_owner: ["خاوەن شوێن", "Venue owner"], t_other: ["تر", "Other"], tabPayments: ["پارەدان", "Payments"],
   payWhere: ["ژمارەی FIB بۆ وەرگرتنی پارە", "FIB number for payments"], payWhereHint: ["کڕیاران لە پەڕەی پارەدان ئەم ژمارە و ناوە دەبینن. تا ژمارەکە زیاد نەکەیت، پارەدان داخراوە.", "Customers see this number and name on the payment page. Payments stay closed until a number is set."],
   fibNumber: ["ژمارەی FIB", "FIB number"], fibName: ["ناوی خاوەن هەژمار (وەک لە FIB دەردەکەوێت)", "Account name (as shown in FIB)"],
   fWaiting: ["چاوەڕێی پشتڕاستکردنەوە", "To check"], fPaid: ["دراوە", "Paid"], confirmPay: ["پشتڕاستکردنەوە – پارە گەیشت", "Confirm – money received"], rejectPay: ["نەگەیشت", "Not received"],
@@ -288,7 +297,7 @@ function logoHtml(v) { return v && v.logo_path ? `<img alt="" src="${esc(publicU
 document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { tab = b.dataset.tab; render(); load(); });
 function render() {
   document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
-  for (const k of ["changes", "photos", "places", "payments", "claims", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
+  for (const k of ["changes", "photos", "places", "payments", "support", "claims", "team", "settings"]) $("#" + k + "Box").hidden = tab !== k;
   if (tab === "changes") renderChanges();
   if (tab === "photos") renderPhotos();
   if (tab === "places") renderPlaces();
@@ -302,6 +311,7 @@ function load() {
   if (tab === "settings") loadSettings();
   if (tab === "claims") loadClaims();
   if (tab === "payments") loadPayments();
+  if (tab === "support") loadSupport();
 }
 function chips(sel, opts, cur, on) {
   const box = $(sel); box.innerHTML = "";
@@ -509,6 +519,61 @@ async function loadClaims() {
   loadOwners();
 }
 
+// ---------- support chats ----------
+let supF = "open", supOpenId = null;
+async function loadSupportCount() {
+  const { data } = await sb.rpc("admin_support_threads", { p_status: "open" });
+  const n = (Array.isArray(data) ? data : []).filter(x => x.team_unread > 0).length;
+  $("#supN").hidden = !n; $("#supN").textContent = n || "";
+}
+async function loadSupport(keepOpen) {
+  chips("#supF", [["open", t("fOpen")], ["solved", t("fSolved")], ["all", t("fAll")]], supF, k => { supF = k; supOpenId = null; loadSupport(); });
+  const box = $("#supList");
+  const { data, error } = await sb.rpc("admin_support_threads", { p_status: supF });
+  if (error) { box.innerHTML = `<p class="hint">${esc(/function|schema cache/.test(error.message) ? t("need0013") : t("failed"))}</p>`; return; }
+  const list = Array.isArray(data) ? data : [];
+  if (supF === "open") { const n = list.filter(x => x.team_unread > 0).length; $("#supN").hidden = !n; $("#supN").textContent = n || ""; }
+  if (keepOpen && document.activeElement && document.activeElement.closest && document.activeElement.closest("#supList")) return; // don't disturb typing
+  box.innerHTML = list.length ? "" : `<p class="hint">${t("nothing")}</p>`;
+  for (const th of list) {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<div class="grow" style="cursor:pointer" data-head>
+        <b>${esc(th.display_name || "?")}</b>${th.username ? " · @" + esc(th.username) : ""} ${th.team_unread > 0 ? `<span class="pill wait">${th.team_unread}</span>` : ""} ${th.is_owner ? `<span class="pill mut">${t("owner")}</span>` : ""}
+        <div class="who">${esc(t("t_" + th.topic))} · ${esc(when(th.last_at))}${th.phone ? ` · <a class="ltr" href="tel:${esc(th.phone)}">${esc(th.phone)}</a>` : ""}</div>
+        <div class="who" style="margin-top:4px">${th.last_from_team ? "↪ " : ""}${esc((th.last_body || "").slice(0, 140))}</div>
+      </div><div data-body hidden></div>`;
+    const body = d.querySelector("[data-body]");
+    const open = async () => {
+      supOpenId = th.id; body.hidden = false; body.innerHTML = `<p class="hint">…</p>`;
+      const { data: msgs } = await sb.from("support_messages").select("id, from_team, body, created_at").eq("thread_id", th.id).order("id", { ascending: true }).limit(500);
+      body.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;margin:12px 0;max-height:420px;overflow:auto" data-msgs>${(msgs || []).map(m => `
+          <div style="align-self:${m.from_team ? "flex-end" : "flex-start"};max-width:85%;padding:8px 12px;border-radius:14px;background:${m.from_team ? "var(--coral)" : "var(--soft, #EFEAF4)"};color:${m.from_team ? "#fff" : "inherit"};white-space:pre-wrap">${esc(m.body)}<div style="font-size:11px;opacity:.7;margin-top:2px">${m.from_team ? esc(t("team")) + " · " : ""}${esc(when(m.created_at))}</div></div>`).join("")}</div>
+        <textarea rows="3" data-reply placeholder="${esc(t("replyPh"))}" style="width:100%;box-sizing:border-box"></textarea>
+        <div class="acts"><button class="primary small" type="button" data-send>${t("send")}</button>
+        <button class="ghost small" type="button" data-solve>${th.status === "solved" ? t("reopen") : t("markSolved")}</button></div>`;
+      const ml = body.querySelector("[data-msgs]"); ml.scrollTop = ml.scrollHeight;
+      if (th.team_unread > 0) sb.rpc("admin_support_seen", { p_thread: th.id });
+      body.querySelector("[data-send]").onclick = async ev => {
+        const txt = body.querySelector("[data-reply]").value.trim(); if (!txt) return;
+        ev.target.disabled = true;
+        const { error } = await sb.rpc("admin_support_reply", { p_thread: th.id, p_body: txt });
+        ev.target.disabled = false;
+        if (error) return showMsg(t("failed"), "err");
+        th.team_unread = 0; open();
+      };
+      body.querySelector("[data-solve]").onclick = async ev => {
+        ev.target.disabled = true;
+        const { error } = await sb.rpc("admin_support_status", { p_thread: th.id, p_solved: th.status !== "solved" });
+        if (error) { ev.target.disabled = false; return showMsg(t("failed"), "err"); }
+        showMsg(t("saved")); supOpenId = null; loadSupport();
+      };
+    };
+    d.querySelector("[data-head]").onclick = () => { if (!body.hidden) { body.hidden = true; supOpenId = null; } else open(); };
+    box.appendChild(d);
+    if (supOpenId === th.id) open();
+  }
+}
+
 // ---------- team ----------
 async function loadTeam() {
   const { data, error } = await sb.rpc("admin_team");
@@ -635,7 +700,12 @@ async function refreshAuth() {
   show("app");
   await loadTeam();
   loadChanges(); countPending(); loadClaims(); loadPayments();
-  if (!window._payTimer) window._payTimer = setInterval(() => { if (!document.hidden && tab === "payments") loadPayments(); }, 30000);
+  loadSupport();
+  if (!window._payTimer) window._payTimer = setInterval(() => {
+    if (document.hidden) return;
+    if (tab === "payments") loadPayments();
+    if (tab === "support") loadSupport(true); else loadSupportCount();
+  }, 30000);
 }
 $("#loginForm").onsubmit = async e => {
   e.preventDefault(); $("#loginMsg").innerHTML = "";
